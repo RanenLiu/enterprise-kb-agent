@@ -1,0 +1,168 @@
+# ──────────────────────────────────────────
+# 开源版 Docker Compose
+# ──────────────────────────────────────────
+# 向量 + 全文检索
+# ──────────────────────────────────────────
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: enterprise_kb
+      POSTGRES_USER: kbuser
+      POSTGRES_PASSWORD: kbpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data/os/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kbuser -d enterprise_kb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7.2-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/os/redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:RELEASE.2025-02-28T09-55-16Z
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - ./data/os/minio:/data
+    command: server /data --console-address ":9001"
+
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.25
+    environment:
+      ETCD_AUTO_COMPACTION_MODE: revision
+      ETCD_AUTO_COMPACTION_RETENTION: "1000"
+      ETCD_QUOTA_BACKEND_BYTES: "4294967296"
+    volumes:
+      - ./data/os/etcd:/etcd
+    command: >
+      etcd
+      --data-dir=/etcd
+      --listen-client-urls=http://0.0.0.0:2379
+      --advertise-client-urls=http://0.0.0.0:2379
+
+  milvus:
+    image: milvusdb/milvus:v2.6.15
+    ports:
+      - "19530:19530"
+      - "9091:9091"
+    environment:
+      ETCD_ENDPOINTS: etcd:2379
+      MINIO_ADDRESS: minio:9000
+    depends_on:
+      - etcd
+      - minio
+    volumes:
+      - ./data/os/milvus:/var/lib/milvus
+    command: ["milvus", "run", "standalone"]
+
+  attu:
+    image: zilliz/attu:v2.6
+    ports:
+      - "8080:3000"
+    environment:
+      MILVUS_URL: milvus:19530
+    depends_on:
+      - milvus
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: kbuser
+      RABBITMQ_DEFAULT_PASS: kbpass
+    ports:
+      - "5672:5672"
+    volumes:
+      - ./data/os/rabbitmq:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: server/backend/Dockerfile
+      shm_size: 4G
+    image: enterprise-kb-backend:0.1.0
+    ports:
+      - "8000:8000"
+    env_file: ./server/.env
+    environment:
+      CUDA_VISIBLE_DEVICES: "-1"
+      OMP_NUM_THREADS: "4"
+      PYTORCH_NO_CUDA: "1"
+      DATABASE_URL: postgresql+asyncpg://kbuser:kbpass@postgres:5432/enterprise_kb
+      REDIS_URL: redis://redis:6379/0
+      MILVUS_HOST: milvus
+      NEO4J_URI: ""
+      MINIO_ENDPOINT: minio:9000
+      RABBITMQ_HOST: rabbitmq
+      EMBEDDING_MODEL: /models/BAAI/bge-m3
+      RERANK_MODEL: /models/BAAI/bge-reranker-v2-m3
+    volumes:
+      - /Users/xiangliu/models:/models:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      milvus:
+        condition: service_started
+
+  worker:
+    image: enterprise-kb-backend:0.1.0
+    build:
+      context: .
+      dockerfile: server/backend/Dockerfile
+    entrypoint: python -m worker
+    shm_size: 4G
+    env_file: ./server/.env
+    environment:
+      CUDA_VISIBLE_DEVICES: "-1"
+      OMP_NUM_THREADS: "4"
+      PYTORCH_NO_CUDA: "1"
+      DATABASE_URL: postgresql+asyncpg://kbuser:kbpass@postgres:5432/enterprise_kb
+      REDIS_URL: redis://redis:6379/0
+      MILVUS_HOST: milvus
+      MINIO_ENDPOINT: minio:9000
+      RABBITMQ_HOST: rabbitmq
+      EMBEDDING_MODEL: /models/BAAI/bge-m3
+      RERANK_MODEL: /models/BAAI/bge-reranker-v2-m3
+    volumes:
+      - /Users/xiangliu/models:/models:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    image: enterprise-kb-frontend:0.1.0
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend

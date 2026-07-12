@@ -1,0 +1,26 @@
+# AI Assistant / Harness
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.env
+*.egg-info/
+.eggs/
+
+# Node
+node_modules/
+
+# Build
+dist/
+logs/
+
+# Docker data (bind mounts, not in repo)
+data/
+
+# Generated test documents
+test_samples/
+
+# OS
+.DS_Store
+*.swp

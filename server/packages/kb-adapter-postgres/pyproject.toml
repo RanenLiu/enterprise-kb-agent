@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kb-adapter-postgres"
+version = "0.1.0"
+description = "Enterprise KB - PostgreSQL Adapter"
+requires-python = ">=3.11"
+dependencies = [
+    "sqlalchemy>=2.0",
+    "asyncpg>=0.31",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]

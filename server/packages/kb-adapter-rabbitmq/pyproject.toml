@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kb-adapter-rabbitmq"
+version = "0.1.0"
+description = "Enterprise KB - RabbitMQ Adapter"
+requires-python = ">=3.11"
+dependencies = [
+    "kb-biz",
+    "aio-pika",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
