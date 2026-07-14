@@ -126,6 +126,7 @@ ROLE_PERMISSIONS: dict[BuiltInRole, list[BuiltInPermission]] = {
         BuiltInPermission.ROLE_READ,
         BuiltInPermission.CHAT_ACCESS,
         BuiltInPermission.MENU_READ,
+        BuiltInPermission.SYSTEM_CONFIG,
         BuiltInPermission.SYSTEM_LOGS,
         BuiltInPermission.PROJECT_CREATE,
         BuiltInPermission.PROJECT_READ,

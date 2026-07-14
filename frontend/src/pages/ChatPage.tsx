@@ -13,7 +13,7 @@ export function ChatPage() {
     deepThinking, toggleDeepThinking,
     editingMsgId, editContent,
     startEdit, setEditContent, submitEdit, cancelEdit,
-    loadSessions, selectSession, createSession, deleteSession,
+    loadSessions, selectSession, createSession, deleteSession, batchDeleteSessions,
     sendMessage, abortStream,
   } = useChat()
   const isMobile = useIsMobile()
@@ -54,6 +54,7 @@ export function ChatPage() {
           onSelect={handleSelectSession}
           onCreate={handleCreateSession}
           onDelete={deleteSession}
+          onBatchDelete={batchDeleteSessions}
         />
       </div>
       <div className="flex-1 flex flex-col min-w-0">
@@ -85,14 +86,16 @@ export function ChatPage() {
           onEditSubmit={submitEdit}
           onEditCancel={cancelEdit}
         />
-        <ChatInput
-          onSend={sendMessage}
-          onAbort={abortStream}
-          isLoading={isLoading}
-          disabled={!currentSessionId}
-          deepThinking={deepThinking}
-          onToggleDeepThinking={toggleDeepThinking}
-        />
+        {currentSessionId && (
+          <ChatInput
+            onSend={sendMessage}
+            onAbort={abortStream}
+            isLoading={isLoading}
+            disabled={!currentSessionId}
+            deepThinking={deepThinking}
+            onToggleDeepThinking={toggleDeepThinking}
+          />
+        )}
       </div>
     </div>
   )

@@ -134,17 +134,17 @@ export function DepartmentPage() {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label className="text-xs text-muted-foreground">名称</Label>
-                        <p className="text-base font-medium">{myDept.name}</p>
+                        <p className="text-sm text-foreground/80">{myDept.name}</p>
                       </div>
                       <div>
                         <Label className="text-xs text-muted-foreground">编码</Label>
-                        <p className="text-sm text-muted-foreground">{myDept.code}</p>
+                        <p className="text-sm text-foreground/80">{myDept.code}</p>
                       </div>
                     </div>
                     {myDept.description && (
                       <div>
                         <Label className="text-xs text-muted-foreground">描述</Label>
-                        <p className="text-sm text-muted-foreground">{myDept.description}</p>
+                        <p className="text-sm text-foreground/80">{myDept.description}</p>
                       </div>
                     )}
                     <Button variant="outline" size="sm" className="mt-2" onClick={() => openEdit(myDept)}>
@@ -160,7 +160,7 @@ export function DepartmentPage() {
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogContent className="sm:max-w-md">
               <DialogHeader><DialogTitle className="text-lg">编辑部门信息</DialogTitle></DialogHeader>
-              <div className="space-y-4 py-2" autoComplete="off"><div aria-hidden="true" style="position:absolute;left:-9999px"><input type="text" tabIndex={-1} autoComplete="username" /><input type="password" tabIndex={-1} autoComplete="current-password" /></div>
+              <div className="space-y-4 py-2" autoComplete="off"><div aria-hidden="true" style={{position:'absolute',left:-9999}}><input type="text" tabIndex={-1} autoComplete="username" /><input type="password" tabIndex={-1} autoComplete="current-password" /></div>
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">部门名称</Label>
                   <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="focus-visible:ring-1" />
@@ -271,7 +271,7 @@ export function DepartmentPage() {
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader><DialogTitle className="text-lg">{editing ? '编辑部门' : '新建部门'}</DialogTitle></DialogHeader>
-            <div className="space-y-4 py-2" autoComplete="off"><div aria-hidden="true" style="position:absolute;left:-9999px"><input type="text" tabIndex={-1} autoComplete="username" /><input type="password" tabIndex={-1} autoComplete="current-password" /></div>
+            <div className="space-y-4 py-2" autoComplete="off"><div aria-hidden="true" style={{position:'absolute',left:-9999}}><input type="text" tabIndex={-1} autoComplete="username" /><input type="password" tabIndex={-1} autoComplete="current-password" /></div>
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">名称 <span className="text-destructive">*</span></Label>
                   <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="如：技术部" className="focus-visible:ring-1" />
@@ -296,7 +296,7 @@ export function DepartmentPage() {
               {editing && (
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Milvus 分区</Label>
-                  <Input value={editing.milvus_partition} disabled className="focus-visible:ring-1 bg-muted/30" />
+                  <Input value={editing.milvus_partition || 'default'} disabled className="focus-visible:ring-1 bg-muted/30" />
                   <p className="text-[10px] text-muted-foreground">创建时自动生成，不可修改</p>
                 </div>
               )}

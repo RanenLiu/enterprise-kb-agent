@@ -91,7 +91,8 @@ class PGSearch:
         async with self._async_session_factory() as session:
             # Primary: tsvector fulltext search
             sql = rf"""
-                SELECT c.id, c.doc_id, c.dept_id, c.content, COALESCE(c.metadata->>'heading_path', '') AS heading_path, d.visibility,
+                SELECT c.id, c.doc_id, c.dept_id, c.content, COALESCE(c.metadata->>'heading_path', '') AS heading_path,
+                       COALESCE(c.metadata->>'page_range', '') AS page_range, d.visibility,
                        ts_rank(c.content_tsv, plainto_tsquery('simple', :query)) AS score
                 FROM chunks c
                 JOIN documents d ON d.id = c.doc_id
@@ -117,6 +118,7 @@ class PGSearch:
                         dept_id=str(row.dept_id),
                         content=row.content,
                         heading_path=row.heading_path or "",
+                        page_range=row.page_range or "",
                         score=float(row.score),
                         visibility=row.visibility,
                         source="fulltext",
@@ -131,7 +133,8 @@ class PGSearch:
                 params = {f"t{i}": f"%{t}%" for i, t in enumerate(terms)}
                 params["top_k"] = top_k * 2
                 sql2 = rf"""
-                    SELECT c.id, c.doc_id, c.dept_id, c.content, COALESCE(c.metadata->>'heading_path', '') AS heading_path, d.visibility
+                    SELECT c.id, c.doc_id, c.dept_id, c.content, COALESCE(c.metadata->>'heading_path', '') AS heading_path,
+                           COALESCE(c.metadata->>'page_range', '') AS page_range, d.visibility
                     FROM chunks c
                     JOIN documents d ON d.id = c.doc_id
                     WHERE ({term_conditions})
@@ -154,6 +157,7 @@ class PGSearch:
                             dept_id=str(row.dept_id),
                             content=row.content,
                             heading_path=row.heading_path or "",
+                            page_range=row.page_range or "",
                             score=0.5,  # BM25 rescore at service.py level
                             source="fulltext",
                         ))

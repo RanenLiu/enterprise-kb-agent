@@ -19,9 +19,7 @@ This document describes the architecture of the **Open Source Edition**.
 
 ## 1. System Architecture Overview
 
-> **Interactive diagram**: [architecture-overview.html](architecture-overview.html) (open in browser, export as PNG/PDF using the built-in toolbar)
 > 
-> ![System Architecture](diagrams/architecture-overview.png)
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -32,16 +30,16 @@ This document describes the architecture of the **Open Source Edition**.
                              │ HTTP / SSE
 ┌────────────────────────────▼─────────────────────────────┐
 │                    FastAPI Gateway                       │
-│  ┌──────────┬──────────┬──────────┬───────────────────┐  │
-│  │   Auth   │  Chat    │ Admin    │    Knowledge      │  │
-│  │  Routes  │  Routes  │ Routes   │    Routes         │  │
-│  └────┬─────┴────┬─────┴────┬─────┴────────┬──────────┘  │
+│  ┌─────────┬───────────┬──────────┬───────────────────┐  │
+│  │   Auth  │   Chat    │  Admin   │   Knowledge       │  │
+│  │  Routes │   Routes  │  Routes  │   Routes          │  │
+│  └────┬────┴─────┬─────┴────┬─────┴────────┬──────────┘  │
 │       │          │          │              │             │
-│  ┌────▼────┐┌────▼─────┐┌───▼─────┐┌────────▼────────┐   │
-│  │ JWT Auth││ LangGraph││ RBAC    ││ Doc Pipeline    │   │
-│  │ + Rate  ││ State    ││ Middle- ││ (parse → chunk  │   │
-│  │ Limiter ││ Machine  ││ ware    ││ → index)        │   │
-│  └─────────┘└──────────┘└─────────┘└─────────────────┘   │
+│  ┌────▼────┐┌────▼─────┐┌───▼─────┐┌───────▼──────────┐  │
+│  │ JWT Auth││ LangGraph││ RBAC    ││ Doc Pipeline     │  │
+│  │ + Rate  ││ State    ││ Middle- ││ (parse → chunk   │  │
+│  │ Limiter ││ Machine  ││ ware    ││ → index)         │  │
+│  └─────────┘└──────────┘└─────────┘└──────────────────┘  │
 └────────────────────────────┬─────────────────────────────┘
                              │
 ┌────────────────────────────▼────────────────────────────┐
@@ -67,8 +65,8 @@ This document describes the architecture of the **Open Source Edition**.
 |-------|---------------|
 | **Frontend** | UI rendering, state management, JWT token handling, SSE consumption |
 | **Gateway** | Request routing, authentication, authorization, rate limiting, CORS |
-| **Chat Engine** | Intent classification, multi-turn conversation orchestration (LangGraph) |
-| **RAG Engine** | Document parsing, chunking, indexing, multi-route retrieval, re-ranking |
+| **RAG Pipeline** | Multi-channel retrieval, hybrid search, BM25 rescore, reranking, LangGraph orchestration |
+| **Storage** | Persistent data, vector indices, cache, file storage |
 | **Storage** | Persistent data, vector indices, cache, file storage |
 
 ### Data Flow: Query
@@ -184,22 +182,23 @@ Isolation is enforced at three levels:
 Documents go through a multi-stage pipeline designed for high-quality retrieval:
 
 ```
-Upload (.pdf/.docx/.xlsx/.pptx/.md/.txt/.msg/.eml/.png/.jpg)
+Upload (.pdf/.docx/.xlsx/.pptx/.md/.txt/.csv/.msg/.eml)
   │
   ▼
-[Parser] — MinerU for PDFs (structural extraction with layout analysis)
-           PyMuPDF for text PDFs
-           LlamaIndex readers for Office formats (DOCX/XLSX/PPTX)
+[Parser] — PyMuPDF for PDFs (structure-aware, heading detection by font size)
+           python-docx for DOCX (heading-aware extraction)
+           python-pptx for PPTX (slide titles + body)
+           openpyxl for XLSX (sheet-aware extraction)
            Native parser for TXT/MD/CSV
-           email library for MSG/EML
-           OCR for scanned images (JPG/PNG/BMP/TIFF)
+           email.parser for MSG/EML
   │
   ▼
-[Chunker] — Semantic splitting:
+[Chunker] — Heading-aware splitting (+ paragraph/sentence fallback for plain text):
             - Split by headings (## / ###)
+            - Fallback: paragraphs → sentences when no headings found
+            - Cross-chunk overlap for context continuity
             - Track heading_path: "Doc > Section > Subsection"
             - Merge small paragraphs below min_chunk_size
-            - Cross-page merge for continued paragraphs
   │
   ▼
 [Indexing Engine] — For each chunk, in parallel (3s timeout):
@@ -207,37 +206,51 @@ Upload (.pdf/.docx/.xlsx/.pptx/.md/.txt/.msg/.eml/.png/.jpg)
             └── HQG: LLM generates hypothetical questions the chunk could answer
   │
   ▼
-[Milvus] — Embed via bge-m3 (1024d) → Insert with dept_id filter
+[Milvus] — Embed via HuggingFaceEmbedding(bge-m3, 1024d) via LlamaIndex
+           Insert with dept_id + project_id + visibility fields
   │
   ▼
-[PostgreSQL] — Write chunk content + heading_path + page_range
+[PostgreSQL] — Write chunk content + heading_path + page_range + milvus_id
                Trigger: UPDATE content_tsv (tsvector for fulltext search)
                Status: ready
 ```
 
 ### Retrieval Pipeline
 
-> **Process diagram**: [retrieval-pipeline.html](retrieval-pipeline.html) — interactive flowchart
 > 
-> ![Retrieval Pipeline](diagrams/retrieval-pipeline.png)
 
-At query time, two parallel routes execute:
+At query time, the pipeline supports pluggable strategies before the standard multi-channel retrieval:
 
 ```
                            User Query
                               │
+              ┌───────────────┴───────────────┐
+              │  Optional Pre-retrieval       │
+              │  Strategies:                  │
+              │  ├─ HyDE: LLM generates       │
+              │  │   hypothetical answer →    │
+              │  │   embed + vector search    │
+              │  ├─ QueryFusion: multi-       │
+              │  │   perspective variants →   │
+              │  │   parallel search → RRF    │
+              │  └─ StepDecomp: sub-question  │
+              │     decomposition →           │
+              │     sequential search         │
+              └───────────────┬───────────────┘
+                              │
                 ┌─────────────┴─────────────┐
                 │                           │
     ┌───────────▼───────────┐   ┌───────────▼───────────┐
-    │  Route 1: Vector      │   │  Route 2: BM25        │
-    │  (Milvus)             │   │  (PostgreSQL ILIKE)   │
+    │  Route 1: Vector      │   │  Route 2: Fulltext    │
+    │  (Milvus via pymilvus)│   │  (PostgreSQL tsvector)│
     │                       │   │                       │
-    │  1. Embed query via   │   │  1. jieba segment +   │
-    │     bge-m3 (1024d)    │   │     stop-word removal │
-    │  2. dept_id filter    │   │  2. Term extraction   │
-    │  3. Cosine similarity │   │     (phrase + terms)  │
-    │     top-K             │   │  3. ILIKE match +     │
-    │                       │   │     BM25 scoring      │
+    │  1. HuggingFaceEmbed  │   │  1. tsquery match     │
+    │     (bge-m3, 1024d)   │   │  2. ILIKE fallback    │
+    │     via LlamaIndex    │   │     (Chinese jieba)   │
+    │  2. dept_id + visibi- │   │  3. dept_id filter    │
+    │     lity filter expr  │   │                       │
+    │  3. Cosine similarity │   │                       │
+    │     (IVF_FLAT, top-K) │   │                       │
     └───────────┬───────────┘   └───────────┬───────────┘
                 │                           │
                 └─────────────┬─────────────┘
@@ -248,15 +261,26 @@ At query time, two parallel routes execute:
                      └────────┬────────┘
                               │
                      ┌────────▼────────┐
-                     │  Source Dedup   │
-                     │  Keep top doc's │
-                     │  chunks only    │
+                     │  BM25 Rescore   │
+                     │  (jieba + BM25) │
+                     │  Prevents RRF   │
+                     │  flattening     │
                      └────────┬────────┘
                               │
                      ┌────────▼────────┐
                      │  Cross-Encoder  │
                      │  Re-rank        │
                      │  (bge-reranker) │
+                     │  via LlamaIndex │
+                     │  SentenceTrans- │
+                     │  formerRerank   │
+                     └────────┬────────┘
+                              │
+                     ┌────────▼────────┐
+                     │  Strict Mode    │
+                     │  Gate           │
+                     │  (score<0.2)    │
+                     │  → "未找到"      │
                      └────────┬────────┘
                               │
                      ┌────────▼────────┐
@@ -266,22 +290,23 @@ At query time, two parallel routes execute:
                      └─────────────────┘
 ```
 
-### Why Two Routes?
+### Why Multi-Channel?
 
-| Route | Strength | Weakness |
-|-------|----------|----------|
+| Channel | Strength | Weakness |
+|---------|----------|----------|
 | **Vector** | Semantic understanding, handles paraphrasing | Misses exact keyword matches |
-| **Fulltext (BM25)** | Exact keyword match, proper nouns, codes | No semantic understanding |
+| **Fulltext** | Exact keyword match, proper nouns, codes | No semantic understanding |
+| **BM25 Rescore** | Chinese keyword precision with jieba | Redundant after reranker |
 
-The two routes complement each other. RRF fusion ensures that documents appearing in multiple result sets are boosted. Source dedup eliminates noise by surfacing only the most relevant document. Cross-Encoder re-ranking provides the final quality gate.
+The three-step post-processing (RRF → BM25 → Cross-Encoder) ensures that: RRF boosts documents found by multiple channels, BM25 prevents RRF from flattening Chinese keyword precision, and Cross-Encoder provides the final semantic quality gate. The Strict Mode gate ensures that knowledge queries without relevant results return "not found" rather than relying on LLM hallucination.
+
+HyDE (optional) generates a hypothetical answer via LLM and uses its embedding for vector search — bridging the gap between user wording and document wording. Enabled via `USE_HYDE=true`.
 
 ---
 
 ## 4. Agent Pipeline
 
-> **Process diagram**: [agent-pipeline.html](agent-pipeline.html) — interactive flowchart
 > 
-> ![Agent Pipeline](diagrams/agent-pipeline.png)
 
 The chat module uses an **orchestrated pipeline** (LangGraph state graph + explicit `run_agent()` orchestration). The pipeline has 9 stages:
 

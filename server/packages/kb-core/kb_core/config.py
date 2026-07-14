@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     # RAG
     embedding_model: str = "BAAI/bge-m3"
     rerank_model: str = "BAAI/bge-reranker-v2-m3"
+    use_hyde: bool = True
+    use_query_fusion: bool = False
+    use_step_decomp: bool = False
 
     # MinIO
     minio_endpoint: str = "localhost:9000"

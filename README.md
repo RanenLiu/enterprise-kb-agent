@@ -12,7 +12,7 @@ An intelligent Q&A system built on Retrieval-Augmented Generation (RAG). Upload 
 
 - **Retrieval**: Hybrid search (vector + fulltext) with cross-encoder reranking
 - **Chat**: LangGraph-powered multi-turn conversation with intent detection
-- **Documents**: Supports PDF, Office, images, email — auto-parsed and indexed
+- **Documents**: Supports pdf, docx, xlsx, pptx, markdown, csv — auto-parsed and indexed
 - **RBAC**: Department-level access control with role-based permissions
 - **Docker**: One-command deployment with `docker compose`
 
@@ -44,10 +44,13 @@ Default admin account: `admin` / `admin123`
 ### 🔍 Hybrid Search
 | Channel | Engine | Description |
 |---------|--------|-------------|
-| Vector | Milvus | Semantic similarity search with BGE-M3 embeddings |
-| Fulltext | PostgreSQL tsvector | BM25-style keyword search with Chinese word segmentation |
-| Fusion | RRF | Reciprocal Rank Fusion combines both result sets |
+| Vector | Milvus (IVF_FLAT, COSINE) | Semantic similarity search with BGE-M3 embeddings |
+| Fulltext | PostgreSQL tsvector + ILIKE | BM25-style keyword search with Chinese word segmentation |
+| Fusion | RRF | Reciprocal Rank Fusion combines multi-channel results |
+| BM25 Rescore | jieba + BM25 | Chinese keyword rescoring prevents RRF from flattening precision matches |
 | Rerank | Cross-Encoder | BGE-reranker-v2 re-ranks top candidates for precision |
+| **HyDE** *(default: on)* | LLM-generated hypothetical answer | Bridges query-document wording gaps. Cost: +1 LLM call (~3s) per query |
+| **QueryFusion** *(optional)* | Multi-perspective LLM expansion | Generates query variants, searches all, RRF merges. Cost: 3-5x retrieval + fusion delay |
 
 ### 💬 Intelligent Chat
 - Multi-turn conversation with LangGraph state machine
@@ -55,14 +58,15 @@ Default admin account: `admin` / `admin123`
 - Short-term context (Redis sliding window) + long-term memory (PostgreSQL)
 - Streaming SSE responses with real-time token output
 - Deep thinking mode with reasoning content display (typewriter effect)
-- Source citation in every answer
+- Source citation with relevance threshold (score ≥ 0.2)
+- Strict mode: knowledge_query without results returns "not found", no LLM hallucination
+- General chat intent skips knowledge base search entirely
 
 ### 📄 Document Processing
 | Format | Parser |
 |--------|--------|
 | PDF | PyMuPDF (structure-aware, table detection) |
-| Office | LlamaIndex readers (DOCX, XLSX, PPTX) |
-| Images | PaddleOCR (JPG, PNG, BMP, TIFF) |
+| Office | Native parsers (DOCX, XLSX, PPTX) |
 | Text | Native parser (TXT, MD, CSV) |
 | Email | Native .msg / .eml parser |
 

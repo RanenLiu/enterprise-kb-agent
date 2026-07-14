@@ -334,7 +334,8 @@ async def preview_office_document(
         raise NotFoundException("Document")
 
     ext = "." + (doc.file_name.rsplit(".", 1)[-1].lower() if "." in doc.file_name else "")
-    if ext not in OFFICE_EXTENSIONS:
+    PREVIEW_EXTENSIONS = OFFICE_EXTENSIONS | frozenset({".eml", ".msg"})
+    if ext not in PREVIEW_EXTENSIONS:
         raise NotFoundException("Preview not available for this file type")
 
     try:
@@ -354,7 +355,27 @@ async def preview_office_document(
 
     text = extract_text(doc.file_name, data)
     if text is None:
-        raise NotFoundException("Could not extract text from this document")
+        # Try email parser for .eml files
+        ext = "." + (doc.file_name.rsplit(".", 1)[-1].lower() if "." in doc.file_name else "")
+        if ext in (".eml", ".msg"):
+            try:
+                from email import policy
+                from email.parser import BytesParser
+                msg = BytesParser(policy=policy.default).parsebytes(data)
+                if msg.is_multipart():
+                    parts = []
+                    for part in msg.walk():
+                        if part.get_content_type() == "text/plain":
+                            text = part.get_content()
+                            if text:
+                                parts.append(text)
+                    text = "\n".join(parts) if parts else msg.get_body(preferencelist=("plain",)).get_content()
+                else:
+                    text = msg.get_content() or ""
+            except Exception:
+                pass
+        if not text:
+            raise NotFoundException("Could not extract text from this document")
 
     return Response(data=text)
 

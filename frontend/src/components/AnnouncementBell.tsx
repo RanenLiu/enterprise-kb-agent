@@ -9,12 +9,21 @@ interface Announcement {
   title: string
   content: string
   read: boolean
+  scope?: string
   created_at: string
+}
+
+function scopeLabel(scope: string | undefined, tenantName: string): string {
+  if (scope === 'system') return '[系统]'
+  if (scope === 'tenant') return `[${tenantName}]`
+  if (scope === 'dept') return '[部门]'
+  return ''
 }
 
 export function AnnouncementBell() {
   const [unreadCount, setUnreadCount] = useState(0)
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
+  const [tenantName, setTenantName] = useState('系统名称')
   const [open, setOpen] = useState(false)
   const [detail, setDetail] = useState<Announcement | null>(null)
   const ref = useRef<HTMLDivElement>(null)
@@ -39,6 +48,10 @@ export function AnnouncementBell() {
 
   useEffect(() => {
     fetchUnread()
+    // Fetch tenant name for scope label
+    api.getTenantInfo().then(r => {
+      if (r.data?.name) setTenantName(r.data.name)
+    }).catch(() => {})
 
     let sse: EventSource | null = null
     let fallbackInterval: ReturnType<typeof setInterval> | null = null
@@ -138,7 +151,9 @@ export function AnnouncementBell() {
                       <div className={`h-2 w-2 rounded-full ${a.read ? 'bg-transparent' : 'bg-primary'}`} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium truncate">{a.title}</div>
+                      <div className="text-sm font-medium truncate">
+                        <span className="text-primary/60 text-xs font-normal">{scopeLabel(a.scope, tenantName)} </span>{a.title}
+                      </div>
                       <div className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{a.content}</div>
                       <div className="text-[10px] text-muted-foreground/60 mt-1">
                         {new Date(a.created_at).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
@@ -155,7 +170,7 @@ export function AnnouncementBell() {
       <Dialog open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-lg">{detail?.title}</DialogTitle>
+            <DialogTitle className="text-lg"><span className="text-primary/60 text-sm font-normal">{scopeLabel(detail?.scope, tenantName)} </span>{detail?.title}</DialogTitle>
           </DialogHeader>
           {detail && (
             <div className="space-y-3">

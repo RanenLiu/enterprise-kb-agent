@@ -20,6 +20,7 @@ class Announcement(UUIDMixin, TimestampMixin, Base):
     created_by: Mapped[Optional[uuid.UUID]] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
+    scope: Mapped[str] = mapped_column(String(20), nullable=False, default="tenant")
     expires_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 

@@ -99,7 +99,7 @@ export function KnowledgePage() {
         setPreviewContent(await resp.text())
       } else if (ext === 'pdf') {
         setPreviewContent(`__PDF__:${doc.file_path}`)
-      } else if (OFFICE_EXTENSIONS.has(ext)) {
+      } else if (OFFICE_EXTENSIONS.has(ext) || ext === 'eml' || ext === 'msg') {
         const token = api.getToken()
         const resp = await fetch(`/api/v1/knowledge/preview-text/${doc.id}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : undefined,
@@ -233,7 +233,7 @@ export function KnowledgePage() {
           {previewLoading ? (
             <p className="text-muted-foreground animate-pulse text-center py-8">加载中...</p>
           ) : (<div className="flex flex-col min-h-0">
-            {previewDoc?.file_path && !previewContent.startsWith('__OFFICE_FAIL__:') && !previewContent.startsWith('__DOWNLOAD__:') && (
+            {previewDoc?.file_path && !previewContent.startsWith('__OFFICE_FAIL__:') && !previewContent.startsWith('__DOWNLOAD__:') && !previewContent.startsWith('__HTML__:') && (
               <div className="bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-200 px-4 py-2 text-xs text-center border-b shrink-0 flex items-center justify-center gap-1">
                 预览效果可能与实际文档有差异，
                 <a href={fileUrl(previewDoc.file_path)} download className="font-semibold underline underline-offset-2">下载</a>

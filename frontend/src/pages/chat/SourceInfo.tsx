@@ -15,6 +15,10 @@ export function SourceInfo({ chunks }: SourceInfoProps) {
 
   if (!chunks || chunks.length === 0) return null
 
+  // Only show if at least one chunk has meaningful relevance score
+  const maxScore = Math.max(...chunks.map(c => c.score || 0))
+  if (maxScore < 0.2) return null
+
   // Group by document name
   const grouped = chunks.reduce(
     (acc, c) => {
@@ -34,6 +38,7 @@ export function SourceInfo({ chunks }: SourceInfoProps) {
 
   return (
     <div className="mt-2 border-t pt-2 border-muted-foreground/10 space-y-1">
+      <p className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-wider mb-1">相关文档</p>
       {docNames.map(docName => {
         const docChunks = grouped[docName]
         const isExpanded = expandedDocs[docName]
@@ -52,7 +57,6 @@ export function SourceInfo({ chunks }: SourceInfoProps) {
               <div className="ml-5 space-y-0.5 pb-1">
                 {docChunks.map((chunk, i) => {
                   const heading = (chunk.heading_path || '').replace(/#/g, '').trim()
-                  // Show only section name (last part of heading_path)
                   const parts = heading.split(' > ')
                   const section = parts.length > 1 ? parts.slice(1).join(' > ') : ''
                   const page = chunk.page_range ? `第${chunk.page_range}页` : ''

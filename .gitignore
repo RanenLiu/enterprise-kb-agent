@@ -24,3 +24,5 @@ test_samples/
 # OS
 .DS_Store
 *.swp
+.claude/settings.local.json
+.vscode/

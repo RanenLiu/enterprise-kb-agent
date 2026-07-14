@@ -357,13 +357,15 @@ export function UserPage() {
                 allowedRoleCodes.includes(r.code) ||
                 (editing && editing.role_ids?.includes(r.id))
               )
+              const isSelf = editing && user && editing.id === user.id
               return visibleRoles.length > 0 ? (
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">角色 <span className="text-destructive">*</span></Label>
                   <div className="border rounded-lg p-3 space-y-1.5 bg-muted/20">
+                    {isSelf && <p className="text-xs text-muted-foreground mb-1">不能修改自己的角色</p>}
                     {visibleRoles.map((r: any) => (
-                      <label key={r.id} className="flex items-center gap-2.5 py-1 px-1 text-sm rounded hover:bg-background cursor-pointer transition-colors">
-                        <input type="checkbox" checked={selectedRoles.includes(r.id)} onChange={() => toggleRole(r.id)} className="h-4 w-4 rounded border-primary text-primary focus:ring-primary" />
+                      <label key={r.id} className={`flex items-center gap-2.5 py-1 px-1 text-sm rounded transition-colors ${isSelf ? '' : 'hover:bg-background cursor-pointer'}`}>
+                        <input type="checkbox" checked={selectedRoles.includes(r.id)} onChange={() => toggleRole(r.id)} disabled={isSelf} className="h-4 w-4 rounded border-primary text-primary focus:ring-primary disabled:opacity-50" />
                         {r.name}
                       </label>
                     ))}

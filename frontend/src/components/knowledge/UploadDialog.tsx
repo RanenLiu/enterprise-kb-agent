@@ -57,7 +57,7 @@ export function UploadDialog({ open, onOpenChange, onSuccess }: UploadDialogProp
         >
           <p className="text-muted-foreground mb-2">拖拽文件到此处，或点击选择</p>
           <p className="text-xs text-muted-foreground">
-            支持 PDF/DOCX/XLSX/PPTX/MD/TXT/图片/邮件，上限 50MB
+            支持 PDF/DOCX/XLSX/PPTX/MD/TXT/CSV/邮件，上限 50MB
           </p>
           <input
             id="file-input"

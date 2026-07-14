@@ -13,6 +13,7 @@ export function SettingsPage() {
   const { user } = useAuth()
   const isSuperAdmin = user?.roles?.includes('super_admin')
   const isTenantAdmin = user?.roles?.includes('tenant_admin')
+  const isDeptAdmin = user?.roles?.includes('dept_admin')
   const [tenant, setTenant] = useState({ name: '', logo: '' })
   const [loading, setLoading] = useState(true)
   const [logoUploading, setLogoUploading] = useState(false)
@@ -102,8 +103,8 @@ export function SettingsPage() {
   useEffect(() => { fetchTenant() }, [fetchTenant])
 
   useEffect(() => {
-    if (isSuperAdmin) fetchAnnouncements()
-  }, [isSuperAdmin, fetchAnnouncements])
+    if (isSuperAdmin || isTenantAdmin || isDeptAdmin) fetchAnnouncements()
+  }, [isSuperAdmin, isTenantAdmin, isDeptAdmin, fetchAnnouncements])
 
   const handleUploadLogo = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -192,8 +193,8 @@ export function SettingsPage() {
         </div>
       )}
 
-      {/* Announcement management — super admin only */}
-      {isSuperAdmin && (
+      {/* Announcement management — super admin / tenant admin */}
+      {(isSuperAdmin || isTenantAdmin || isDeptAdmin) && (
         <div className="page-section">
           <Card className="border shadow-sm gap-0">
             <CardHeader className="border-b bg-muted/30">

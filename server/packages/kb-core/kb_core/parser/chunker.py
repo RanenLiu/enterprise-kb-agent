@@ -32,8 +32,8 @@ def chunk_text(
             ...
         ]
     """
-    # 按标题行预分割
-    sections = _split_by_headings(text)
+    # 智能分割：优先标题，其次段落，最后句子
+    sections = _split_into_sections(text)
 
     chunks: list[dict[str, Any]] = []
     current_chunk = ""
@@ -45,9 +45,11 @@ def chunk_text(
         m = re.match(r"^(#{1,6})\s", line.strip())
         return len(m.group(1)) if m else 0
 
+    _prev_content = ""  # 用于 overlap
+
     def _flush():
         """提交当前 chunk（跳过纯页码标记的零碎内容）. """
-        nonlocal current_chunk, current_idx
+        nonlocal current_chunk, current_idx, _prev_content
         if current_chunk:
             content = current_chunk.strip()
             # 跳过纯页码或空内容
@@ -59,6 +61,7 @@ def chunk_text(
                     "headings": deepcopy([re.sub(r"^#{1,6}\s+", "", h) for h in heading_stack]),
                 })
                 current_idx += 1
+                _prev_content = content
         current_chunk = ""
 
     def _update_heading_stack(line: str):
@@ -94,7 +97,11 @@ def chunk_text(
             current_chunk += section
         else:
             _flush()
-            current_chunk = section
+            # 跨 chunk overlap：追加前一个 chunk 尾部内容
+            if overlap > 0 and _prev_content:
+                current_chunk = _prev_content[-overlap:] + "\n" + section
+            else:
+                current_chunk = section
 
     # 提交最后一段
     _flush()
@@ -143,6 +150,46 @@ def _split_by_headings(text: str) -> list[str]:
     """按 Markdown 标题分割，保留标题和其下的正文。"""
     sections = re.split(r"\n(?=#{1,6}\s)", text)
     return [s.strip() for s in sections if s.strip()]
+
+
+def _split_by_paragraphs(text: str) -> list[str]:
+    """按段落（双换行）分割，用于无标题的纯文本。
+
+    如果段落仍然超过 chunk_size，进一步按句子分割。
+    """
+    paragraphs = re.split(r"\n\s*\n", text)
+    return [p.strip() for p in paragraphs if p.strip()]
+
+
+def _split_by_sentences(text: str) -> list[str]:
+    """按句子分割（中文句号、英文句点、问号、感叹号）。"""
+    parts = re.split(r"([。！？!?\n])", text)
+    sentences: list[str] = []
+    buf = ""
+    for part in parts:
+        if re.match(r"^[。！？!?\n]$", part):
+            buf += part
+            if buf.strip():
+                sentences.append(buf.strip())
+            buf = ""
+        else:
+            buf = part
+    if buf.strip():
+        sentences.append(buf.strip())
+    return sentences
+
+
+def _split_into_sections(text: str) -> list[str]:
+    """智能分割文本：优先按标题分割，无标题则按段落，再按句子。"""
+    sections = _split_by_headings(text)
+    if len(sections) > 1:
+        return sections
+    # 无 Markdown 标题，按段落分割
+    paragraphs = _split_by_paragraphs(text)
+    if len(paragraphs) > 1:
+        return paragraphs
+    # 只有一个大段落，按句子分割
+    return _split_by_sentences(text)
 
 
 def _find_split(text: str, target: int) -> int:

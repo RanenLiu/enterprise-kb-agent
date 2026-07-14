@@ -26,21 +26,14 @@ RUN --mount=type=cache,target=/root/.cache/pip \
         minio openpyxl aio-pika greenlet pymilvus 'bcrypt<4.1'
 
 # Worker ML dependencies (document parsing + embedding)
+# CPU-only torch to avoid downloading 1GB+ of NVIDIA GPU libraries
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --no-cache-dir \
+        torch --index-url https://download.pytorch.org/whl/cpu
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --no-cache-dir \
         python-docx python-pptx \
         sentence-transformers
-
-# Purge GPU garbage — CPU inference only, no CUDA/triton needed.
-# Separate RUN so COPY --from picks up the cleaned state (whiteout layer).
-RUN rm -rf /usr/local/lib/python3.11/site-packages/nvidia \
-           /usr/local/lib/python3.11/site-packages/triton \
-           /usr/local/lib/python3.11/site-packages/cuda* \
-           /usr/local/lib/python3.11/site-packages/torch/lib/libtorch_cuda* \
-           /usr/local/lib/python3.11/site-packages/torch/include \
-           /usr/local/lib/python3.11/site-packages/torch/bin \
-           /usr/local/lib/python3.11/site-packages/torch/testing \
-           /usr/local/lib/python3.11/site-packages/torch/distributed
 
 # ═══════════════════════════════════════════════
 #  RUNTIME STAGE — minimal production image

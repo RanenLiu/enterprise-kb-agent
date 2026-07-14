@@ -8,7 +8,7 @@ import type { Document } from '@/types/knowledge'
 
 const VIS_CLASSES: Record<string, string> = {
   private: 'bg-muted text-muted-foreground border-muted-foreground/20',
-  dept: 'bg-success/10 text-success-foreground border-success/30',
+  dept: 'bg-primary/10 text-primary border-primary/30',
   public: 'bg-primary/10 text-primary border-primary/30',
 }
 
@@ -36,13 +36,14 @@ export function DocumentTable({ documents, onPreview, onDelete, onReindex, onVis
   const { user } = useAuth()
   const isSuperAdmin = user?.roles?.includes('super_admin')
   const isTenantAdmin = user?.roles?.includes('tenant_admin')
+  const isDeptAdmin = user?.roles?.includes('dept_admin')
   const isAdmin = isSuperAdmin || isTenantAdmin
   const hasDept = !!user?.dept_id
 
   const canChangeVisibility = (doc: Document): boolean => {
     if (isAdmin) return true
-    if (doc.visibility === 'public') return false
-    return true
+    if (isDeptAdmin && doc.visibility !== 'public') return true
+    return false  // 部门管理员不能改全局公有文档
   }
 
   if (documents.length === 0) {
@@ -54,12 +55,12 @@ export function DocumentTable({ documents, onPreview, onDelete, onReindex, onVis
       <TableHeader>
         <TableRow>
           <TableHead className="w-[15%] min-w-[120px]">文件名</TableHead>
-          <TableHead className="w-[5%]">类型</TableHead>
-          <TableHead className="w-[5%]">大小</TableHead>
+          <TableHead className="w-[5%] hidden md:table-cell">类型</TableHead>
+          <TableHead className="w-[5%] hidden md:table-cell">大小</TableHead>
           <TableHead className="w-[5%]">状态</TableHead>
           <TableHead className="w-[5%]">可见范围</TableHead>
-          <TableHead className="w-[5%]">Chunk 数</TableHead>
-          <TableHead className="w-[6%]">上传时间</TableHead>
+          <TableHead className="w-[5%] hidden md:table-cell">Chunk 数</TableHead>
+          <TableHead className="w-[6%] hidden md:table-cell">上传时间</TableHead>
           <TableHead className="w-[8%]">操作</TableHead>
         </TableRow>
       </TableHeader>
@@ -74,8 +75,8 @@ export function DocumentTable({ documents, onPreview, onDelete, onReindex, onVis
                 {doc.file_name}
               </button>
             </TableCell>
-            <TableCell>{doc.file_type.toUpperCase()}</TableCell>
-            <TableCell>{formatSize(doc.file_size)}</TableCell>
+            <TableCell className="hidden md:table-cell">{doc.file_type.toUpperCase()}</TableCell>
+            <TableCell className="hidden md:table-cell">{formatSize(doc.file_size)}</TableCell>
             <TableCell><DocumentStatus status={doc.status} /></TableCell>
             <TableCell>
               {doc.status === 'ready' ? (
@@ -99,8 +100,8 @@ export function DocumentTable({ documents, onPreview, onDelete, onReindex, onVis
                 <span className="text-xs text-muted-foreground">-</span>
               )}
             </TableCell>
-            <TableCell>{doc.chunk_count}</TableCell>
-            <TableCell>{formatDate(doc.created_at)}</TableCell>
+            <TableCell className="hidden md:table-cell">{doc.chunk_count}</TableCell>
+            <TableCell className="hidden md:table-cell">{formatDate(doc.created_at)}</TableCell>
             <TableCell className="space-x-1 whitespace-nowrap">
               {doc.status === 'ready' && doc.file_path && (
                 <Button variant="outline" size="icon" className="h-8 w-8" asChild title="下载">
@@ -109,17 +110,21 @@ export function DocumentTable({ documents, onPreview, onDelete, onReindex, onVis
                   </a>
                 </Button>
               )}
-              <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => onReindex(doc.id)} disabled={['parsing', 'chunking', 'indexing'].includes(doc.status)} title="重索引">
-                <RotateCw className="h-3.5 w-3.5" />
-              </Button>
+              {(isAdmin || doc.uploaded_by === user?.id) && (
+                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => onReindex(doc.id)} disabled={['parsing', 'chunking', 'indexing'].includes(doc.status)} title="重索引">
+                  <RotateCw className="h-3.5 w-3.5" />
+                </Button>
+              )}
               {onGraph && (
                 <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => onGraph(doc.id)} title="图谱">
                   <Share2 className="h-3.5 w-3.5" />
                 </Button>
               )}
-              <Button variant="destructive" size="icon" className="h-8 w-8" onClick={() => onDelete(doc.id)} title="删除">
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
+              {(isAdmin || doc.uploaded_by === user?.id) && (
+                <Button variant="destructive" size="icon" className="h-8 w-8" onClick={() => onDelete(doc.id)} title="删除">
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              )}
             </TableCell>
           </TableRow>
         )})}

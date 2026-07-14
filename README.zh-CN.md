@@ -12,7 +12,7 @@
 
 - **检索**：混合检索（向量 + 全文）+ Cross-Encoder 重排
 - **聊天**：LangGraph 驱动的多轮对话，含意图识别
-- **文档**：支持 PDF、Office、图片、邮件 — 自动解析索引
+- **文档**：支持 pdf、docx、xlsx、pptx、markdown等格式 — 自动解析索引
 - **权限**：部门级 RBAC 访问控制
 - **部署**：`docker compose` 一键启动
 
@@ -44,25 +44,29 @@ open http://localhost:5173
 ### 🔍 混合检索
 | 通道 | 引擎 | 说明 |
 |---------|--------|-------------|
-| 向量 | Milvus | BGE-M3 语义相似度检索 |
-| 全文 | PostgreSQL tsvector | BM25 关键词匹配，支持中文分词 |
+| 向量 | Milvus (IVF_FLAT, COSINE) | BGE-M3 语义相似度检索 |
+| 全文 | PostgreSQL tsvector + ILIKE | BM25 关键词匹配，支持中文分词 |
 | 融合 | RRF | 互惠排名融合，合并多路结果 |
-| 重排 | Cross-Encoder | BGE-reranker-v2 精排，提升精度 |
+| BM25 重排 | jieba + BM25 | 中文关键词重排，防止 RRF 摊平精确匹配 |
+| 精排 | Cross-Encoder | BGE-reranker-v2 精排，提升精度 |
+| **HyDE** *(默认开启)* | LLM 生成假设答案 | 弥合问答措辞差异。代价：每次查询 +1 次 LLM 调用 (~3s) |
+| **QueryFusion** *(可选)* | 多视角 LLM 扩展 | 多查询变体并行检索后 RRF 融合。代价：3-5x 检索延迟 |
 
 ### 💬 智能聊天
 - LangGraph 状态机驱动的多轮对话
-- 意图分类（知识检索 / 闲聊 / 工具调用）
+- 意图识别和确认（知识检索 / 闲聊 / 工具调用）
 - 短期（Redis 滑动窗口）+ 长期记忆（PostgreSQL）
-- SSE 流式输出，实时展示 token
-- 回答附引用来源
+- SSE 流式输出
+- 回答附引用来源（score ≥ 0.2 阈值，低分不显示）
+- 严格模式：知识查询无结果时返回"未找到"，不依赖 LLM 自有知识
+- 闲聊意图自动跳过知识库检索
 
 ### 📄 文档处理
 | 格式 | 解析器 |
 |--------|--------|
 | PDF | PyMuPDF（结构感知、表格检测） |
-| Office | LlamaIndex readers（DOCX/XLSX/PPTX） |
-| 图片 | PaddleOCR（JPG/PNG/BMP/TIFF） |
-| 文本 | Native 解析（TXT/MD/CSV） |
+| Office | Native 解析（DOCX/XLSX/PPTX） |
+| 文本 | Native 解析（TXT/MD/CSV/MARKDOWN） |
 | 邮件 | .msg / .eml 解析 |
 
 ### 👥 权限控制

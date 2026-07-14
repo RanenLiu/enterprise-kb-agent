@@ -7,7 +7,6 @@ import { toast } from 'sonner'
 import type { ChatMessage, RetrievalChunk } from '@/types/chat'
 import { SourceInfo } from './SourceInfo'
 
-
 function ReasoningBlock({ content, initiallyExpanded }: { content: string; initiallyExpanded?: boolean }) {
   const [collapsed, setCollapsed] = useState(!initiallyExpanded)
   const [displayed, setDisplayed] = useState('')
@@ -103,20 +102,20 @@ export function MessageBubble({ message, chunks, isStreaming, isLastUser, onEdit
     >
       <div
         className={cn(
-          'max-w-[75%] rounded-2xl px-4 py-3 relative',
+          'max-w-[60%] rounded-2xl px-4 py-3 relative break-words',
           isUser
-            ? 'bg-primary text-primary-foreground rounded-br-sm'
-            : 'bg-muted rounded-bl-sm',
+            ? 'bg-primary/20 text-foreground rounded-br-sm'
+            : 'bg-muted/70 text-foreground rounded-bl-sm',
         )}
       >
         {isUser ? (
           <>
-            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+            <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
             {message.created_at && (
               <div className="flex items-center justify-end gap-2 mt-1">
-                <p className="text-[10px] text-primary-foreground/50">{new Date(message.created_at).toLocaleString()}</p>
+                <p className="text-[10px] text-foreground/40">{new Date(message.created_at).toLocaleString()}</p>
                 <button onClick={() => { navigator.clipboard.writeText(message.content); toast.success('已复制') }}
-                  className="text-[10px] text-primary-foreground/30 hover:text-primary-foreground/60 transition-colors cursor-pointer"
+                  className="text-[10px] text-foreground/30 hover:text-foreground/60 transition-colors cursor-pointer"
                   title="复制内容">
                   <Copy className="h-3 w-3" />
                 </button>
@@ -137,17 +136,23 @@ export function MessageBubble({ message, chunks, isStreaming, isLastUser, onEdit
             {message.reasoning_content && (
               <ReasoningBlock content={message.reasoning_content} initiallyExpanded={!!isStreaming} />
             )}
-            <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:font-bold prose-h3:text-base prose-h4:text-sm prose-strong:text-foreground prose-strong:font-semibold">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            <div className="prose prose-sm dark:prose-invert max-w-none text-sm break-words prose-headings:font-bold prose-h3:text-base prose-h4:text-sm prose-strong:text-foreground prose-strong:font-semibold">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  pre: ({ children }) => <pre style={{whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', wordBreak: 'break-word', overflow: 'hidden'}}>{children}</pre>,
+                  code: ({ children }) => <code style={{whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', wordBreak: 'break-word'}}>{children}</code>,
+                }}
+              >
                 {message.content}
               </ReactMarkdown>
             </div>
             {chunks && chunks.length > 0 && <SourceInfo chunks={chunks} />}
             {message.created_at && !isStreaming && (
               <div className="flex items-center gap-2 mt-1">
-                <p className="text-[10px] text-muted-foreground/40">{new Date(message.created_at).toLocaleString()}</p>
+                <p className="text-[10px] text-foreground/40">{new Date(message.created_at).toLocaleString()}</p>
                 <button onClick={() => { navigator.clipboard.writeText(message.content); toast.success('已复制') }}
-                  className="text-[10px] text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors cursor-pointer"
+                  className="text-[10px] text-foreground/30 hover:text-foreground/60 transition-colors cursor-pointer"
                   title="复制内容">
                   <Copy className="h-3 w-3" />
                 </button>

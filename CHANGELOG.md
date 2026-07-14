@@ -3,6 +3,16 @@
 ## [未发布]
 
 ### 新增
+- LlamaIndex 检索管线: HuggingFaceEmbedding(bge-m3) + SentenceTransformerRerank，替代自定义向量检索和重排
+- 检索增强策略: HyDE(假设文档嵌入)、QueryFusion(多视角查询)、StepDecomp(多步分解)，config 开关控制
+- BM25 中文重排回归: jieba 分词在 RRF 融合后重打分，防止 RRF 摊平精确匹配
+- 严格模式: knowledge_query 无有效结果(score<0.2)时返回"未找到"，不依赖 LLM 自有知识
+- 闲聊不检索: general_chat 意图自动跳过知识库搜索，不展示检索来源
+- 来源阈值过滤: score<0.2 的 chunk 不展示"相关文档"区域
+- 相关文档标签: 引用来源/相关文档/检索来源 三态合并为统一的"相关文档"
+- 会话列表多选删除: 后端 batch-delete + 前端 checkbox 批量选择
+- 公告 scope 前缀: system/tenant/dept 三级，显示 [系统]/[租户名]/[部门] 标签
+- 无标题文件智能分块: TXT/CSV/EML/XLSX 按段落→句子递归分块，支持跨 chunk overlap
 - 多轮检索缓存: Redis 3 轮 LRU，query embedding 余弦相似度匹配，支持代词消解
 - BM25 中文检索评分: 纯 Python 实现，RRF 融合后重打分，jieba 分词 + 停用词过滤
 - MMR 多样性选择模块: Jaccard 相似度 + λ 参数控制相关/多样平衡
@@ -14,6 +24,21 @@
 - 文档解析: PPTX 区分标题/正文，标题前加 `#` 标记
 
 ### 修复
+- React 19 style 异常: style prop 传字符串改为对象（error #62）
+- PGSearch 参数 bug: project_ids 误传入 top_k 参数（企业版全文检索 top_k 长期损坏）
+- Docker CUDA 依赖: OS Dockerfile 先装 CPU torch，避免 sentence-transformers 拉 CUDA 版
+- 登录密码长度: LoginRequest 去掉 min_length=6，登录只校验匹配
+- 验证码红边框: 验证码错误时用户名/密码不加红边框
+- 聊天字体颜色: 统一 text-foreground（Light=黑，Dark=白）
+- 用户气泡背景: bg-primary/15→/20，AI 气泡 bg-muted→/70
+- 长文本换行: 添加 break-words，pre 代码块 white-space:pre-wrap
+- 气泡宽度: max-w-[75%]→[60%]
+- 无会话时隐藏输入区域
+- Office 预览提示统一: 所有预览统一显示下载提示（后端生成的 HTML 内部已包含，前端不再重复）
+- 用户不能改自己角色: 编辑自己时角色 checkbox 禁用
+- 首页去 GraphRAG: 开源版首页去掉企业版内容
+- 文档可见范围: 仅超管/租户管/部门管可修改，dept_editor/dept_viewer 不可修改
+- 文档删除/重索引: 仅所有者和超管/租户管可见操作按钮
 - [object Object] 错误提示: 前端 client.ts 处理 `json.detail` 为数组时逐条提取 `.msg`（OS + Enterprise）
 - ILIKE 全给 0.5 分无区分度: BM25 替换固定分，按词频+逆文档频率重算相关分
 - 来源污染（显示无关文档）: 按文档总分选 top doc 替代 MMR 多样性选取

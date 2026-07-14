@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re as _re
 import time
 import uuid
 from typing import Any, AsyncGenerator
@@ -320,22 +321,25 @@ async def run_agent(
         if tr["tool"] == "retrieve_knowledge":
             for r in tr["result"].get("results", []):
                 search_results_list.append(SearchResult(**r))
-            # Emit retrieval SSE event with source-document matching
+            # Emit retrieval SSE event (only for knowledge_query, otherwise suppress sources)
             raw_chunks = tr["result"].get("results", [])
+            show_sources = state.intent == "knowledge_query"
+            # Filter chunks by score threshold for knowledge_query
+            display_chunks = [
+                {
+                    "doc_id": r.get("doc_id", ""),
+                    "content": r.get("content", "")[:200],
+                    "heading_path": r.get("heading_path", ""),
+                    "page_range": r.get("page_range", ""),
+                    "score": r.get("score", 0),
+                    "source": r.get("source", ""),
+                }
+                for r in raw_chunks
+            ] if show_sources else []
             yield {
                 "event": "retrieval",
                 "data": {
-                    "chunks": [
-                        {
-                            "doc_id": r.get("doc_id", ""),
-                            "content": r.get("content", "")[:200],
-                            "heading_path": r.get("heading_path", ""),
-                            "page_range": r.get("page_range", ""),
-                            "score": r.get("score", 0),
-                            "source": r.get("source", ""),
-                        }
-                        for r in raw_chunks
-                    ],
+                    "chunks": display_chunks,
                     "queried_doc_ids": list(queried_doc_ids),
                 },
             }
@@ -452,6 +456,8 @@ async def run_agent(
                 chunk_id=cc.get("chunk_id", ""),
                 dept_id=cc.get("dept_id", ""),
                 content=cc.get("content", ""),
+                heading_path=cc.get("heading_path", ""),
+                page_range=cc.get("page_range", ""),
                 score=cc.get("score", 0.5),
                 source=cc.get("source", ""),
             ))
@@ -472,16 +478,49 @@ async def run_agent(
     # Step 7: LLM streaming generation
     collected_response = ""
     deep = state.metadata.get("deep_thinking", False)
-    async for event in llm_stream(state, llm):
-        if event["type"] == "reasoning":
-            if deep:
-                yield {"event": "thinking", "data": {"text": event["text"]}}
-        elif event["type"] == "content":
-            collected_response += event["text"]
-            yield {"event": "token", "data": {"text": event["text"]}}
+    # Strict mode: knowledge_query 无有效检索结果时不依赖 LLM 自有知识
+    max_score = max((r.score for r in state.search_results), default=0) if state.search_results else 0
+    if state.intent in ("knowledge_query", "out_of_scope") and max_score < 0.2:
+        no_result_msg = "知识库中未找到相关信息。"
+        collected_response = no_result_msg
+        yield {"event": "token", "data": {"text": no_result_msg}}
+        state.search_results = []  # 清空低分结果，前端不会显示来源
+    else:
+        async for event in llm_stream(state, llm):
+            if event["type"] == "reasoning":
+                if deep:
+                    yield {"event": "thinking", "data": {"text": event["text"]}}
+            elif event["type"] == "content":
+                collected_response += event["text"]
+                yield {"event": "token", "data": {"text": event["text"]}}
 
     # Log total time
     logger.info("Chat response generated in %.1fs", time.time() - _t0)
+
+    # Classify chunks: cited vs related
+    cited_ids: set[str] = set()
+    chunks_meta = state.metadata.get("search_chunks", [])
+    if chunks_meta and collected_response:
+        resp_lower = collected_response.lower()
+        for c in chunks_meta:
+            c_text = c.get("content", "").lower()
+            # Strip [filename] prefix and normalize spaces
+            c_clean = _re.sub(r"^\[.*?\]\s*", "", c_text)
+            c_clean = _re.sub(r"\s+", " ", c_clean).strip()
+            # Keyword overlap matching: extract significant terms from chunk
+            # (CJK words >= 2 chars, English words >= 3 chars)
+            keywords = set(_re.findall(r"[一-鿿]{2,}|[a-z]{3,}", c_clean))
+            if not keywords:
+                if len(c_clean) > 10 and c_clean[:min(60, len(c_clean))] in resp_lower:
+                    cited_ids.add(c.get("doc_id", ""))
+            else:
+                hits = sum(1 for kw in keywords if kw in resp_lower)
+                if hits >= max(2, len(keywords) * 0.6):
+                    cited_ids.add(c.get("doc_id", ""))
+    if chunks_meta:
+        cited = [c for c in chunks_meta if c.get("doc_id", "") in cited_ids]
+        related = [c for c in chunks_meta if c.get("doc_id", "") not in cited_ids]
+        yield {"event": "citations", "data": {"cited": cited, "related": related}}
 
     # Step 8: Generate session title on first message (write to PG before done event)
     r = await get_redis()

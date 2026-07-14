@@ -82,16 +82,22 @@ async def list_departments(
     result = await session.execute(query.order_by(Department.sort_order, Department.name))
     depts = result.scalars().all()
 
-    # Batch-load tenant names
+    # Batch-load tenant names and codes
     tenant_ids = {d.tenant_id for d in depts if d.tenant_id}
-    tenant_names: dict[str, str] = {}
+    tenant_info: dict[str, tuple[str, str]] = {}
     if tenant_ids:
         t_result = await session.execute(
-            select(Tenant.id, Tenant.name).where(Tenant.id.in_(list(tenant_ids)))
+            select(Tenant.id, Tenant.name, Tenant.code).where(Tenant.id.in_(list(tenant_ids)))
         )
-        tenant_names = {str(row[0]): row[1] for row in t_result.all()}
+        tenant_info = {str(row[0]): (row[1], row[2]) for row in t_result.all()}
 
-    return Response(data=[_dept_to_response(d, tenant_names.get(str(d.tenant_id)) if d.tenant_id else None) for d in depts])
+    return Response(data=[
+        _dept_to_response(
+            d,
+            tenant_name=tenant_info.get(str(d.tenant_id), (None, None))[0] if d.tenant_id else None,
+            tenant_code=tenant_info.get(str(d.tenant_id), (None, None))[1] if d.tenant_id else None,
+        ) for d in depts
+    ])
 
 
 @router.get("/departments/{dept_id}", response_model=Response[DepartmentResponse])
@@ -131,11 +137,15 @@ async def create_department(
         default_t = default.scalar_one_or_none()
         tenant_id = default_t.id if default_t else None
 
-    tenant_partition = "tenant_default"
+    # All departments under a tenant share the same partition
     if tenant_id:
         tenant = await session.get(Tenant, tenant_id)
         if tenant:
-            tenant_partition = tenant.milvus_partition
+            tenant_partition = tenant.milvus_partition or f"tenant_{tenant.code}"
+        else:
+            tenant_partition = "default"
+    else:
+        tenant_partition = "default"
 
     dept = Department(
         tenant_id=tenant_id,
@@ -853,6 +863,7 @@ async def list_announcements(
                 id=str(a.id),
                 title=a.title,
                 content=a.content,
+                scope=a.scope,
                 read=a.id in read_ids,
                 is_active=a.is_active,
                 expires_at=a.expires_at,
@@ -963,12 +974,25 @@ async def create_announcement(
     session: AsyncSession = Depends(get_session),
     _user: User = Depends(PermissionChecker(["system.config"])),
 ):
-    """Create a system announcement (super admin only)."""
+    """Create an announcement."""
+    from sqlalchemy import select
+    from kb_biz.models.role import UserRole, Role
+    role_query = await session.execute(
+        select(Role.code).join(UserRole).where(UserRole.user_id == _user.id)
+    )
+    user_role_codes = [row[0] for row in role_query]
+    if "super_admin" in user_role_codes:
+        scope = "system"
+    elif "tenant_admin" in user_role_codes:
+        scope = "tenant"
+    else:
+        scope = "dept"
     a = Announcement(
         title=body.title,
         content=body.content,
         expires_at=body.expires_at,
         created_by=_user.id,
+        scope=scope,
     )
     session.add(a)
     await session.flush()
@@ -978,6 +1002,7 @@ async def create_announcement(
             id=str(a.id),
             title=a.title,
             content=a.content,
+            scope=a.scope,
             is_active=a.is_active,
             expires_at=a.expires_at,
             created_by=str(a.created_by) if a.created_by else None,
@@ -1043,14 +1068,15 @@ async def delete_announcement(
 # ──────────────────────────────────────────────
 
 
-def _dept_to_response(d: Department, tenant_name: str | None = None) -> DepartmentResponse:
+def _dept_to_response(d: Department, tenant_name: str | None = None, tenant_code: str | None = None) -> DepartmentResponse:
+    partition = d.milvus_partition or (f"tenant_{tenant_code}" if tenant_code else "default")
     return DepartmentResponse(
         id=str(d.id),
         name=d.name,
         code=d.code,
         tenant_id=str(d.tenant_id) if d.tenant_id else None,
         tenant_name=tenant_name,
-        milvus_partition=d.milvus_partition,
+        milvus_partition=partition,
         parent_id=str(d.parent_id) if d.parent_id else None,
         logo=d.logo,
         status=d.status,

@@ -9,6 +9,11 @@ interface GraphData {
   relations: GraphRelation[]
 }
 
+interface CitationsData {
+  cited: RetrievalChunk[]
+  related: RetrievalChunk[]
+}
+
 interface UseChatReturn {
   sessions: ChatSession[]
   currentSessionId: string | null
@@ -31,6 +36,7 @@ interface UseChatReturn {
   selectSession: (id: string) => Promise<void>
   createSession: () => Promise<string>
   deleteSession: (id: string) => Promise<void>
+  batchDeleteSessions: (ids: string[]) => Promise<void>
   sendMessage: (content: string) => Promise<void>
   abortStream: () => void
 }
@@ -98,6 +104,16 @@ export function useChat(): UseChatReturn {
     await api.deleteSession(id)
     await loadSessions()
     if (currentSessionId === id) {
+      setCurrentSessionId(null)
+      setMessages([])
+      setChunksByMsg({})
+    }
+  }, [loadSessions, currentSessionId])
+
+  const batchDeleteSessions = useCallback(async (ids: string[]) => {
+    await api.batchDeleteSessions(ids)
+    await loadSessions()
+    if (currentSessionId && ids.includes(currentSessionId)) {
       setCurrentSessionId(null)
       setMessages([])
       setChunksByMsg({})
@@ -274,6 +290,6 @@ export function useChat(): UseChatReturn {
     deepThinking, toggleDeepThinking,
     editingMsgId, editContent,
     startEdit, setEditContent, submitEdit, cancelEdit,
-    loadSessions, selectSession, createSession, deleteSession, sendMessage, abortStream,
+    loadSessions, selectSession, createSession, deleteSession, batchDeleteSessions, sendMessage, abortStream,
   }
 }

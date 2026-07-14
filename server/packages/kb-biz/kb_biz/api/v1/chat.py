@@ -6,6 +6,7 @@ import uuid
 from typing import AsyncGenerator
 
 from fastapi import APIRouter, Depends
+from pydantic import BaseModel
 from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -79,6 +80,32 @@ async def delete_session(
     cs.status = "deleted"
     db_session.add(cs)
     await clear_retrieval_cache(str(session_id))
+    return Response(data=None)
+
+
+class BatchDeleteRequest(BaseModel):
+    session_ids: list[uuid.UUID]
+
+
+@router.post("/sessions/batch-delete", response_model=Response[None])
+async def batch_delete_sessions(
+    body: BatchDeleteRequest,
+    current_user: User = Depends(get_current_user),
+    _user: User = Depends(PermissionChecker(["chat.access"])),
+    db_session: AsyncSession = Depends(get_session),
+):
+    """批量删除会话（软删除）。"""
+    from sqlalchemy import update
+
+    await db_session.execute(
+        update(ConversationSession)
+        .where(ConversationSession.id.in_(body.session_ids))
+        .where(ConversationSession.user_id == current_user.id)
+        .values(status="deleted"),
+    )
+    await db_session.commit()
+    for sid in body.session_ids:
+        await clear_retrieval_cache(str(sid))
     return Response(data=None)
 
 

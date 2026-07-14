@@ -7,7 +7,7 @@ from pydantic import BaseModel, EmailStr, Field, field_validator
 
 class LoginRequest(BaseModel):
     username: str = Field(..., min_length=2, max_length=100)
-    password: str = Field(..., min_length=6, max_length=128)
+    password: str = Field(..., max_length=128)
     captcha_token: str | None = None
     captcha_code: str | None = None
     tenant_code: str | None = None  # 多租户环境下指定租户编码，单租户可留空

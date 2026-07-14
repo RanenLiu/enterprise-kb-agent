@@ -48,25 +48,22 @@ async def lifespan(app: FastAPI):
         logger.warning("Bucket ensure failed (may be already created): %s", e)
     logger.info("Storage client initialized")
 
-    # Wire up RAG pipeline
-    from kb_core.rag.vector import VectorSearch
+    # Wire up RAG pipeline (LlamaIndex)
+    from kb_core.rag.vector_li import LlamaIndexVectorSearch
     from kb_core.rag.fulltext.pg import PGSearch
     from kb_core.rag.fusion import RRFMerge
-    from kb_core.rag.reranker import Reranker
-    from kb_core.rag.service import RetrievalService
+    from kb_core.rag.retrieval_li import LlamaIndexRetrievalService
 
-    vector_search = VectorSearch()
+    vector_search = LlamaIndexVectorSearch()
     fulltext_search = PGSearch(async_session_factory=async_session_factory)
     fusion = RRFMerge()
-    reranker = Reranker()
 
-    di.retrieval_service = RetrievalService(
+    di.retrieval_service = LlamaIndexRetrievalService(
         vector_search=vector_search,
         fulltext_search=fulltext_search,
         fusion=fusion,
-        reranker=reranker,
     )
-    logger.info("RAG pipeline initialized")
+    logger.info("RAG pipeline initialized (LlamaIndex)")
 
     # Wire up rag_service for document upload/delete
     from uuid import uuid4

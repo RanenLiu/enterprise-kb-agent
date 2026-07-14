@@ -11,7 +11,7 @@ export function HomePage() {
   const isSuper = has('admin') // super_admin has all perms, but we check document for viewer
 
   const features = [
-    { icon: MessageSquare, title: '智能问答', desc: '基于 RAG + GraphRAG 的精准问答，多路召回 + 精排，流式输出', color: 'from-violet-500/20 to-purple-500/10', iconColor: 'text-violet-600', perm: 'chat.access' },
+    { icon: MessageSquare, title: '智能问答', desc: '基于 RAG 的精准问答，多路召回 + 精排，流式输出', color: 'from-violet-500/20 to-purple-500/10', iconColor: 'text-violet-600', perm: 'chat.access' },
     { icon: BookOpen, title: '知识库管理', desc: '多格式文档上传、解析、分块、索引，支持 PDF/Word/PPT/Excel', color: 'from-blue-500/20 to-cyan-500/10', iconColor: 'text-blue-600', perm: 'document.create' },
     { icon: Shield, title: '权限管控', desc: 'RBAC 五级角色体系，租户 Partition + 部门字段级数据隔离', color: 'from-amber-500/20 to-orange-500/10', iconColor: 'text-amber-600', perm: 'system.config' },
     { icon: Database, title: '多模型支持', desc: 'DeepSeek / OpenAI / Ollama vLLM 多 Provider 切换', color: 'from-rose-500/20 to-pink-500/10', iconColor: 'text-rose-600', perm: 'llm_config.read' },

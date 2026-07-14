@@ -404,6 +404,10 @@ class ApiClient {
     return this.request('DELETE', `/chat/sessions/${sessionId}`)
   }
 
+  async batchDeleteSessions(sessionIds: string[]): Promise<ApiResponse<null>> {
+    return this.request('POST', '/chat/sessions/batch-delete', { session_ids: sessionIds })
+  }
+
   async listMessages(sessionId: string): Promise<ApiResponse<ChatMessage[]>> {
     return this.request('GET', `/chat/sessions/${sessionId}/messages`)
   }

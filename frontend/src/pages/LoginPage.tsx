@@ -23,6 +23,7 @@ export function LoginPage() {
   const [needCaptcha, setNeedCaptcha] = useState(false)
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [shaking, setShaking] = useState<Record<string, boolean>>({})
+  const isCaptchaError = error.includes('验证码')
   const passwordRef = useRef<HTMLInputElement>(null)
   const captchaRef = useRef<HTMLInputElement>(null)
 
@@ -92,11 +93,11 @@ export function LoginPage() {
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="username">用户名</Label>
-              <Input id="username" aria-invalid={touched.username && !username} placeholder={touched.username && !username ? '用户名不能为空' : '请输入用户名'} value={username} onChange={(e) => setUsername(e.target.value)} onBlur={() => handleBlur('username')} required className={`${shaking.username ? 'input-shake' : ''}${error ? ' border-destructive' : ''}`} />
+              <Input id="username" aria-invalid={touched.username && !username} placeholder={touched.username && !username ? '用户名不能为空' : '请输入用户名'} value={username} onChange={(e) => setUsername(e.target.value)} onBlur={() => handleBlur('username')} required className={`${shaking.username ? 'input-shake' : ''}${error && !isCaptchaError ? ' border-destructive' : ''}`} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">密码</Label>
-              <Input id="password" type="password" ref={passwordRef} aria-invalid={touched.password && !password} placeholder={touched.password && !password ? '密码不能为空' : '请输入密码'} value={password} onChange={(e) => setPassword(e.target.value)} onBlur={() => handleBlur('password')} required className={`${shaking.password ? 'input-shake' : ''}${error ? ' border-destructive' : ''}`} />
+              <Input id="password" type="password" ref={passwordRef} aria-invalid={touched.password && !password} placeholder={touched.password && !password ? '密码不能为空' : '请输入密码'} value={password} onChange={(e) => setPassword(e.target.value)} onBlur={() => handleBlur('password')} required className={`${shaking.password ? 'input-shake' : ''}${error && !isCaptchaError ? ' border-destructive' : ''}`} />
             </div>
             {needCaptcha && captchaSvg && (
               <div className="space-y-2">

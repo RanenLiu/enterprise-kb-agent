@@ -289,6 +289,7 @@ class AnnouncementResponse(BaseModel):
     title: str
     content: str
     read: bool = False
+    scope: str = "tenant"
     is_active: bool
     expires_at: Optional[datetime] = None
     created_by: Optional[str] = None
