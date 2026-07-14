@@ -290,7 +290,6 @@ else:
 ## 4. Agent 管线
 
 > 
-> ![Agent 管线](diagrams/agent-pipeline.png)
 
 聊天模块使用**编排管线**（LangGraph 状态图 + 显式 `run_agent()` 编排），共 9 个阶段：
 
