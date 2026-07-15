@@ -13,6 +13,7 @@ const UserPage = lazy(() => import('@/pages/admin/UserPage').then(m => ({ defaul
 const LogPage = lazy(() => import('@/pages/admin/LogPage').then(m => ({ default: m.LogPage })))
 const ModelPage = lazy(() => import('@/pages/admin/ModelPage').then(m => ({ default: m.ModelPage })))
 const SettingsPage = lazy(() => import('@/pages/admin/SettingsPage').then(m => ({ default: m.SettingsPage })))
+const AnnouncementPage = lazy(() => import('@/pages/admin/AnnouncementPage').then(m => ({ default: m.AnnouncementPage })))
 
 const LazyLoad = ({ children }: { children: React.ReactNode }) => (
   <Suspense fallback={<div className="flex flex-1 items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>}>
@@ -36,6 +37,7 @@ export const protectedRoutes = (
       <Route path="/admin/logs" element={wrap(LogPage)} />
       <Route path="/admin/models" element={wrap(ModelPage)} />
       <Route path="/admin/settings" element={wrap(SettingsPage)} />
+      <Route path="/admin/announcements" element={wrap(AnnouncementPage)} />
     </Route>
   </Route>
 )

@@ -32,6 +32,7 @@ const ROUTE_LABELS: Record<string, string> = {
   '/admin/monitor': '系统监控',
   '/admin/models': '模型配置',
   '/admin/settings': '系统设置',
+  '/admin/announcements': '系统公告',
 }
 
 export function AdminLayout() {
@@ -119,7 +120,7 @@ export function AdminLayout() {
   return (
     <SidebarProvider className="h-dvh overflow-hidden">
       <AppSidebar />
-      <SidebarInset>
+      <SidebarInset className="min-w-0">
         <header className="flex h-16 shrink-0 items-center gap-2 border-b glass px-4 sticky top-0 z-10">
           <SidebarTrigger className="-ml-1 text-muted-foreground hover:text-foreground" />
           <nav className="flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -192,7 +193,7 @@ export function AdminLayout() {
         </header>
 
         <ProfileDialog open={showProfile} onOpenChange={setShowProfile} />
-        <main className={`flex-1 flex flex-col bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/[0.03] via-transparent to-transparent ${isChatPage ? 'overflow-hidden p-0' : 'overflow-y-auto p-6 text-sm'} ${narrow ? 'is-narrow' : ''}`}>
+        <main className={`flex-1 flex flex-col bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/[0.03] via-transparent to-transparent ${isChatPage ? 'overflow-hidden p-0' : 'p-6 text-sm'} ${narrow ? 'is-narrow' : ''}`} style={{ overflow: 'hidden auto', maxWidth: '100%' }}>
           <Outlet />
         </main>
         <footer className="h-8 shrink-0 flex items-center justify-center border-t text-xs text-muted-foreground/60">

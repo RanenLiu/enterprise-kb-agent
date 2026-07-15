@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Download } from 'lucide-react'
+import { Plus, Download } from 'lucide-react'
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { api } from '@/api/client'
@@ -146,7 +146,7 @@ export function KnowledgePage() {
     <div className="list-page animate-fade-in">
       <div className="list-header flex items-center justify-between shrink-0">
         <h1 className="text-2xl font-bold">知识库管理</h1>
-        <Button onClick={() => setUploadOpen(true)}>+ 上传文档</Button>
+        <Button onClick={() => setUploadOpen(true)}><Plus className="mr-1 h-3 w-3" />上传文档</Button>
       </div>
       <div className="list-card">
 

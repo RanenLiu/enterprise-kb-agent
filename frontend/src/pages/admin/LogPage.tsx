@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { api } from '@/api/client'
 import { useAuth } from '@/hooks/useAuth'
-import { FileText, LogIn, RotateCcw } from 'lucide-react'
+import { FileText, LogIn, RotateCcw, Search } from 'lucide-react'
 import { DateTimePicker } from '@/components/DateTimePicker'
 
 const ACTION_LABELS: Record<string, string> = {
@@ -275,7 +275,7 @@ export function LogPage() {
                 </Select>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="default" size="sm" className="h-8 text-xs shadow-sm" onClick={doSearch}>搜索</Button>
+                <Button variant="default" size="sm" className="h-8 text-xs shadow-sm" onClick={doSearch}><Search className="h-3 w-3 mr-1" />搜索</Button>
                 <Button variant="default" size="sm" className="h-8 text-xs shadow-sm" onClick={() => { setFilters({ action_type: '_all', resource_type: '_all', result: '_all', keyword: '', user: '', operator: '', dept_id: '_all', tenant_id: '_all', start_time: '', end_time: '' }); doSearch() }}>
                   <RotateCcw className="mr-1 h-3 w-3" />重置
                 </Button>
@@ -339,7 +339,7 @@ export function LogPage() {
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-normal ${l.result === 'success' ? 'bg-success/15 text-success' : 'bg-destructive/15 text-destructive'
                               }`}>{l.result === 'success' ? '成功' : '失败'}</span>
                           </TableCell>
-                          <TableCell className="text-sm whitespace-nowrap text-muted-foreground">{new Date(l.created_at).toLocaleString()}</TableCell></>
+                          <TableCell className="text-sm whitespace-nowrap text-muted-foreground">{new Date(l.created_at).toLocaleString('zh-CN', { hour12: false })}</TableCell></>
                       ) : (
                         <>
                           <TableCell className="text-sm">{l.username}</TableCell>
@@ -352,7 +352,7 @@ export function LogPage() {
                               }`}>{l.result === 'success' ? '成功' : '失败'}</span>
                           </TableCell>
                           <TableCell className="text-sm text-muted-foreground">{l.failure_reason || '-'}</TableCell>
-                          <TableCell className="text-sm whitespace-nowrap">{new Date(l.created_at).toLocaleString()}</TableCell>
+                          <TableCell className="text-sm whitespace-nowrap">{new Date(l.created_at).toLocaleString('zh-CN', { hour12: false })}</TableCell>
                         </>
                       )}
                     </TableRow>

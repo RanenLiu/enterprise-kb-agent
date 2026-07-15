@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { toast } from 'sonner'
 import { api } from '@/api/client'
-import { Pencil, Trash2, Star, Cpu } from 'lucide-react'
+import { Plus, Pencil, Trash2, Star, Cpu } from 'lucide-react'
 
 export function ModelPage() {
   const [configs, setConfigs] = useState<any[]>([])
@@ -97,7 +97,7 @@ export function ModelPage() {
           <h1 className="text-2xl font-bold tracking-tight">模型配置</h1>
           <p className="text-sm text-muted-foreground mt-1">管理 LLM 提供商和模型参数</p>
         </div>
-        <Button onClick={openCreate}>+ 新建配置</Button>
+        <Button onClick={openCreate}><Plus className="mr-1 h-3 w-3" />新建配置</Button>
       </div>
       <div className="list-card">
         <Card className="admin-table border shadow-sm overflow-hidden">

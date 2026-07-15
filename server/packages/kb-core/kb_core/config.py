@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     minio_bucket: str = "enterprise-kb"
     minio_secure: bool = False
 
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "case_sensitive": False}
+    model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "case_sensitive": False, "extra": "ignore"}
 
 
 settings = Settings()

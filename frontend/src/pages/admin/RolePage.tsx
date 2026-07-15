@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { toast } from 'sonner'
 import { api } from '@/api/client'
-import { Pencil, Trash2, Shield } from 'lucide-react'
+import { Plus, Pencil, Trash2, Shield } from 'lucide-react'
 
 export function RolePage() {
   const [roles, setRoles] = useState<any[]>([])
@@ -104,7 +104,7 @@ export function RolePage() {
           <h1 className="text-2xl font-bold tracking-tight">角色管理</h1>
           <p className="text-sm text-muted-foreground mt-1">定义角色及其权限范围</p>
         </div>
-        <Button onClick={openCreate}>+ 新建角色</Button>
+        <Button onClick={openCreate}><Plus className="mr-1 h-3 w-3" />新建角色</Button>
       </div>
       <div className="list-card">
         <Card className="admin-table border shadow-sm overflow-hidden">

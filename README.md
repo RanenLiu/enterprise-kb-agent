@@ -8,13 +8,13 @@
   <img src="https://img.shields.io/badge/License-Apache%202.0-red" alt="Apache 2.0">
 </p>
 
-An intelligent Q&A system built on Retrieval-Augmented Generation (RAG). Upload documents, ask questions in natural language, and get answers grounded in your knowledge base.
+Company documents live in scattered shared folders — contracts, policies, technical docs, email attachments. You need that Q3 report from last year, but nobody remembers where it is. Windows search won't find what's *inside* the files. And uploading everything to ChatGPT? Not an option — your data can't leave the building.
 
-- **Retrieval**: Hybrid search (vector + fulltext) with cross-encoder reranking
-- **Chat**: LangGraph-powered multi-turn conversation with intent detection
-- **Documents**: Supports pdf, docx, xlsx, pptx, markdown, csv — auto-parsed and indexed
-- **RBAC**: Department-level access control with role-based permissions
-- **Docker**: One-command deployment with `docker compose`
+**Enterprise Knowledge Base Agent** is a self-hosted RAG Q&A system. Drop in your PDFs, Word docs, spreadsheets, CSV files, and emails. Ask questions in plain language. Get answers grounded in your own knowledge base — no data ever leaves your infrastructure.
+
+- **Knowledge goes unused** → Hybrid search (semantic + keyword + rerank) with Cross-Encoder precision, finds what you need even when you don't know the exact terms
+- **Can't trust AI answers** → Strict mode blocks hallucinations, every answer cites its source documents
+- **Can't use public cloud AI** → One-command Docker deployment, all inference runs locally
 
 **English** | [中文](README.zh-CN.md)
 

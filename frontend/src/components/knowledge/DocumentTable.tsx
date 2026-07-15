@@ -29,7 +29,7 @@ function formatSize(bytes: number): string {
 
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr)
-  return d.toLocaleDateString('zh-CN') + ' ' + d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+  return d.toLocaleString('zh-CN', { hour12: false })
 }
 
 export function DocumentTable({ documents, onPreview, onDelete, onReindex, onVisibilityChange, onGraph }: DocumentTableProps) {

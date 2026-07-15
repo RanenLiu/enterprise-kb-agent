@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { api } from '@/api/client'
-import { Bell, Check, X } from 'lucide-react'
+import { useAuth } from '@/hooks/useAuth'
+import { Bell, CheckCheck, X } from 'lucide-react'
 
 interface Announcement {
   id: string
@@ -13,14 +14,15 @@ interface Announcement {
   created_at: string
 }
 
-function scopeLabel(scope: string | undefined, tenantName: string): string {
+function scopeLabel(scope: string | undefined, tenantName: string, deptName: string | null): string {
   if (scope === 'system') return '[系统]'
   if (scope === 'tenant') return `[${tenantName}]`
-  if (scope === 'dept') return '[部门]'
+  if (scope === 'dept') return deptName ? `[${deptName}]` : '[部门]'
   return ''
 }
 
 export function AnnouncementBell() {
+  const { user } = useAuth()
   const [unreadCount, setUnreadCount] = useState(0)
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
   const [tenantName, setTenantName] = useState('系统名称')
@@ -36,19 +38,17 @@ export function AnnouncementBell() {
     } catch { /* ignore */ }
   }
 
-  const fetchAll = async () => {
+  const fetchAll = useCallback(async () => {
     try {
       const res = await api.listAnnouncements()
       setAnnouncements(res.data ?? [])
-      // Also refresh unread count
       const unreadRes = await api.getUnreadAnnouncementCount()
       setUnreadCount(unreadRes.data ?? 0)
     } catch { /* ignore */ }
-  }
+  }, [])
 
   useEffect(() => {
     fetchUnread()
-    // Fetch tenant name for scope label
     api.getTenantInfo().then(r => {
       if (r.data?.name) setTenantName(r.data.name)
     }).catch(() => {})
@@ -69,6 +69,13 @@ export function AnnouncementBell() {
       if (fallbackInterval) clearInterval(fallbackInterval)
     }
   }, [])
+
+  // Sync read status changes from the announcement page
+  useEffect(() => {
+    const handler = () => fetchAll()
+    window.addEventListener('announcement-read-changed', handler)
+    return () => window.removeEventListener('announcement-read-changed', handler)
+  }, [fetchAll])
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -91,6 +98,7 @@ export function AnnouncementBell() {
       await api.markAllAnnouncementsRead()
       setUnreadCount(0)
       setAnnouncements((prev) => prev.map((a) => ({ ...a, read: true })))
+      window.dispatchEvent(new CustomEvent('announcement-read-changed'))
     } catch { /* ignore */ }
   }
 
@@ -99,6 +107,7 @@ export function AnnouncementBell() {
       await api.markAnnouncementRead(id)
       setUnreadCount((c) => Math.max(0, c - 1))
       setAnnouncements((prev) => prev.map((a) => a.id === id ? { ...a, read: true } : a))
+      window.dispatchEvent(new CustomEvent('announcement-read-changed'))
     } catch { /* ignore */ }
   }
 
@@ -126,7 +135,7 @@ export function AnnouncementBell() {
               <div className="flex items-center gap-1">
                 {announcements.length > 0 && (
                   <Button variant="ghost" size="sm" className="h-7 text-xs text-muted-foreground gap-1" onClick={handleMarkAllRead}>
-                    <Check className="h-3 w-3" />全部已读
+                    <CheckCheck className="h-3 w-3" />全部已读
                   </Button>
                 )}
                 <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground" onClick={() => setOpen(false)}>
@@ -141,22 +150,22 @@ export function AnnouncementBell() {
                 announcements.map((a) => (
                   <div
                     key={a.id}
-                    className="flex items-start gap-3 px-4 py-3 border-b last:border-b-0 hover:bg-muted/20 cursor-pointer transition-colors group"
+                    className="flex items-start gap-3 px-4 py-3 border-b last:border-b-0 hover:bg-muted/20 cursor-pointer transition-colors"
                     onClick={async () => {
                       await handleMarkRead(a.id)
                       setDetail(a)
                     }}
                   >
                     <div className="mt-1.5 flex-shrink-0">
-                      <div className={`h-2 w-2 rounded-full ${a.read ? 'bg-transparent' : 'bg-primary'}`} />
+                      <div className={`h-2 w-2 rounded-full ${a.read ? 'border border-muted-foreground/25' : 'bg-primary'}`} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-medium truncate">
-                        <span className="text-primary/60 text-xs font-normal">{scopeLabel(a.scope, tenantName)} </span>{a.title}
+                        <span className="text-primary text-sm font-medium">{scopeLabel(a.scope, tenantName, user?.dept_name ?? null)} </span>{a.title}
                       </div>
                       <div className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{a.content}</div>
                       <div className="text-[10px] text-muted-foreground/60 mt-1">
-                        {new Date(a.created_at).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        {new Date(a.created_at).toLocaleString('zh-CN', { hour12: false })}
                       </div>
                     </div>
                   </div>
@@ -170,12 +179,12 @@ export function AnnouncementBell() {
       <Dialog open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-lg"><span className="text-primary/60 text-sm font-normal">{scopeLabel(detail?.scope, tenantName)} </span>{detail?.title}</DialogTitle>
+            <DialogTitle className="text-lg"><span className="text-primary">{scopeLabel(detail?.scope, tenantName, user?.dept_name ?? null)} </span>{detail?.title}</DialogTitle>
           </DialogHeader>
           {detail && (
             <div className="space-y-3">
               <div className="text-xs text-muted-foreground">
-                {new Date(detail.created_at).toLocaleString('zh-CN')}
+                {new Date(detail.created_at).toLocaleString('zh-CN', { hour12: false })}
               </div>
               <div className="text-sm leading-relaxed whitespace-pre-wrap">{detail.content}</div>
             </div>

@@ -69,7 +69,8 @@ export function AppSidebar() {
       const next = new Set(prev)
       const find = (nodes: MenuNode[], path: string): string | null => {
         for (const n of nodes) {
-          if (n.path && path.startsWith(n.path.replace(/\/$/, ''))) return n.parent_id
+          if (n.path === '/' && path === '/') return n.parent_id
+          if (n.path && n.path !== '/' && path.startsWith(n.path.replace(/\/$/, ''))) return n.parent_id
           if (n.children.length > 0) { const f = find(n.children, path); if (f) return f }
         }
         return null

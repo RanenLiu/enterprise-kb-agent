@@ -41,6 +41,8 @@ from kb_biz.models.tenant import Tenant
 from kb_biz.models.user import User
 from kb_biz.schemas.admin import (
     AnnouncementCreate,
+    AnnouncementReaderInfo,
+    AnnouncementReadStatsResponse,
     AnnouncementResponse,
     AnnouncementUpdate,
     DepartmentCreate,
@@ -766,6 +768,27 @@ async def _publish_announcement_event(event_type: str = "updated") -> None:
         pass
 
 
+def _determine_announcement_scope(user_role_codes: list[str]) -> str:
+    """Determine announcement scope based on user's role codes."""
+    if "super_admin" in user_role_codes:
+        return "system"
+    if "tenant_admin" in user_role_codes:
+        return "tenant"
+    return "dept"
+
+
+def _check_announcement_scope_access(user_role_codes: list[str], scope: str, user_dept_id: uuid.UUID | None = None, ann_dept_id: uuid.UUID | None = None) -> bool:
+    """Check if user's roles allow managing an announcement with the given scope."""
+    if "super_admin" in user_role_codes:
+        return True  # super_admin can manage any scope
+    if "tenant_admin" in user_role_codes:
+        return scope in ("tenant", "dept")  # tenant_admin can manage tenant + dept
+    # dept_admin can only manage announcements belonging to their own department
+    if scope == "dept" and user_dept_id and ann_dept_id:
+        return user_dept_id == ann_dept_id
+    return False
+
+
 async def _user_has_permission(session: AsyncSession, user: User, permission_code: str) -> bool:
     """Check if a user has a specific permission (for user-facing endpoints)."""
     from kb_biz.models.permission import Permission
@@ -837,12 +860,32 @@ async def list_announcements(
 ):
     """List announcements with read status for current user."""
     now = datetime.now(timezone.utc)
+    from sqlalchemy import select as sa_select
+    from kb_biz.models.role import UserRole, Role
+    role_query = await session.execute(
+        sa_select(Role.code).join(UserRole).where(UserRole.user_id == current_user.id)
+    )
+    user_role_codes = [row[0] for row in role_query]
+    is_super = "super_admin" in user_role_codes
     show_all = all and _user_has_permission(session, current_user, "system.config")
     stmt = select(Announcement).order_by(Announcement.created_at.desc())
     if not show_all:
         stmt = stmt.where(Announcement.is_active == True).where(
             sa.or_(Announcement.expires_at.is_(None), Announcement.expires_at > now)
         )
+    # Scope filtering: non-super_admins only see announcements relevant to them
+    if not is_super:
+        user = await session.get(User, current_user.id)
+        scope_filters = [Announcement.scope == "system"]
+        if user.tenant_id:
+            scope_filters.append(
+                sa.and_(Announcement.scope == "tenant", Announcement.tenant_id == user.tenant_id)
+            )
+        if user.dept_id:
+            scope_filters.append(
+                sa.and_(Announcement.scope == "dept", Announcement.dept_id == user.dept_id)
+            )
+        stmt = stmt.where(sa.or_(*scope_filters))
     result = await session.execute(stmt)
     announcements = result.scalars().all()
 
@@ -868,6 +911,8 @@ async def list_announcements(
                 is_active=a.is_active,
                 expires_at=a.expires_at,
                 created_by=str(a.created_by) if a.created_by else None,
+                tenant_id=str(a.tenant_id) if a.tenant_id else None,
+                dept_id=str(a.dept_id) if a.dept_id else None,
                 created_at=a.created_at,
                 updated_at=a.updated_at,
             )
@@ -883,25 +928,35 @@ async def get_unread_count(
 ):
     """Get the count of unread announcements for the current user."""
     now = datetime.now(timezone.utc)
-    total = await session.scalar(
-        select(sa.func.count(Announcement.id))
-        .where(Announcement.is_active == True)
-        .where(
-            sa.or_(Announcement.expires_at.is_(None), Announcement.expires_at > now)
-        )
+    from sqlalchemy import select as sa_select
+    from kb_biz.models.role import UserRole, Role
+    role_query = await session.execute(
+        sa_select(Role.code).join(UserRole).where(UserRole.user_id == current_user.id)
     )
+    user_role_codes = [row[0] for row in role_query]
+    is_super = "super_admin" in user_role_codes
+
+    base = select(Announcement.id).where(Announcement.is_active == True).where(
+        sa.or_(Announcement.expires_at.is_(None), Announcement.expires_at > now)
+    )
+    if not is_super:
+        user = await session.get(User, current_user.id)
+        scope_filters = [Announcement.scope == "system"]
+        if user.tenant_id:
+            scope_filters.append(
+                sa.and_(Announcement.scope == "tenant", Announcement.tenant_id == user.tenant_id)
+            )
+        if user.dept_id:
+            scope_filters.append(
+                sa.and_(Announcement.scope == "dept", Announcement.dept_id == user.dept_id)
+            )
+        base = base.where(sa.or_(*scope_filters))
+
+    total = await session.scalar(select(sa.func.count()).select_from(base.subquery()))
     read = await session.scalar(
         select(sa.func.count(AnnouncementRead.id))
         .where(AnnouncementRead.user_id == current_user.id)
-        .where(
-            AnnouncementRead.announcement_id.in_(
-                select(Announcement.id)
-                .where(Announcement.is_active == True)
-                .where(
-                    sa.or_(Announcement.expires_at.is_(None), Announcement.expires_at > now)
-                )
-            )
-        )
+        .where(AnnouncementRead.announcement_id.in_(base))
     )
     return Response(data=(total or 0) - (read or 0))
 
@@ -913,13 +968,29 @@ async def mark_all_announcements_read(
 ):
     """Mark all active announcements as read."""
     now = datetime.now(timezone.utc)
-    stmt = (
-        select(Announcement)
-        .where(Announcement.is_active == True)
-        .where(
-            sa.or_(Announcement.expires_at.is_(None), Announcement.expires_at > now)
-        )
+    from sqlalchemy import select as sa_select
+    from kb_biz.models.role import UserRole, Role
+    role_query = await session.execute(
+        sa_select(Role.code).join(UserRole).where(UserRole.user_id == current_user.id)
     )
+    user_role_codes = [row[0] for row in role_query]
+    is_super = "super_admin" in user_role_codes
+
+    stmt = select(Announcement).where(Announcement.is_active == True).where(
+        sa.or_(Announcement.expires_at.is_(None), Announcement.expires_at > now)
+    )
+    if not is_super:
+        user = await session.get(User, current_user.id)
+        scope_filters = [Announcement.scope == "system"]
+        if user.tenant_id:
+            scope_filters.append(
+                sa.and_(Announcement.scope == "tenant", Announcement.tenant_id == user.tenant_id)
+            )
+        if user.dept_id:
+            scope_filters.append(
+                sa.and_(Announcement.scope == "dept", Announcement.dept_id == user.dept_id)
+            )
+        stmt = stmt.where(sa.or_(*scope_filters))
     result = await session.execute(stmt)
     for a in result.scalars().all():
         existing = await session.execute(
@@ -981,21 +1052,20 @@ async def create_announcement(
         select(Role.code).join(UserRole).where(UserRole.user_id == _user.id)
     )
     user_role_codes = [row[0] for row in role_query]
-    if "super_admin" in user_role_codes:
-        scope = "system"
-    elif "tenant_admin" in user_role_codes:
-        scope = "tenant"
-    else:
-        scope = "dept"
+    scope = _determine_announcement_scope(user_role_codes)
     a = Announcement(
         title=body.title,
         content=body.content,
         expires_at=body.expires_at,
         created_by=_user.id,
         scope=scope,
+        tenant_id=_user.tenant_id,
+        dept_id=_user.dept_id,
     )
     session.add(a)
     await session.flush()
+    # Creator auto-marked as read
+    session.add(AnnouncementRead(announcement_id=a.id, user_id=_user.id))
     await _publish_announcement_event("created")
     return Response(
         data=AnnouncementResponse(
@@ -1006,6 +1076,8 @@ async def create_announcement(
             is_active=a.is_active,
             expires_at=a.expires_at,
             created_by=str(a.created_by) if a.created_by else None,
+            tenant_id=str(a.tenant_id) if a.tenant_id else None,
+            dept_id=str(a.dept_id) if a.dept_id else None,
             created_at=a.created_at,
             updated_at=a.updated_at,
         )
@@ -1019,10 +1091,19 @@ async def update_announcement(
     session: AsyncSession = Depends(get_session),
     _user: User = Depends(PermissionChecker(["system.config"])),
 ):
-    """Update a system announcement (super admin only)."""
+    """Update an announcement. Scope is validated against the caller's role."""
     a = await session.get(Announcement, announcement_id)
     if not a:
         raise NotFoundException("Announcement")
+    # Scope check: user can only update announcements at or below their role level
+    from sqlalchemy import select
+    from kb_biz.models.role import UserRole, Role
+    role_query = await session.execute(
+        select(Role.code).join(UserRole).where(UserRole.user_id == _user.id)
+    )
+    user_role_codes = [row[0] for row in role_query]
+    if not _check_announcement_scope_access(user_role_codes, a.scope, _user.dept_id, a.dept_id):
+        raise ForbiddenException("You can only manage announcements within your scope")
     if body.title is not None:
         a.title = body.title
     if body.content is not None:
@@ -1031,17 +1112,28 @@ async def update_announcement(
         a.is_active = body.is_active
     if body.expires_at is not None:
         a.expires_at = body.expires_at
+    # Reset read status for other users so they see the updated announcement as unread
+    await session.execute(
+        delete(AnnouncementRead).where(
+            AnnouncementRead.announcement_id == a.id,
+            AnnouncementRead.user_id != _user.id,
+        )
+    )
     session.add(a)
     await session.flush()
+    await session.refresh(a)
     await _publish_announcement_event("updated")
     return Response(
         data=AnnouncementResponse(
             id=str(a.id),
             title=a.title,
             content=a.content,
+            scope=a.scope,
             is_active=a.is_active,
             expires_at=a.expires_at,
             created_by=str(a.created_by) if a.created_by else None,
+            tenant_id=str(a.tenant_id) if a.tenant_id else None,
+            dept_id=str(a.dept_id) if a.dept_id else None,
             created_at=a.created_at,
             updated_at=a.updated_at,
         )
@@ -1054,13 +1146,81 @@ async def delete_announcement(
     session: AsyncSession = Depends(get_session),
     _user: User = Depends(PermissionChecker(["system.config"])),
 ):
-    """Delete a system announcement (super admin only)."""
+    """Delete an announcement. Scope is validated against the caller's role."""
     a = await session.get(Announcement, announcement_id)
     if not a:
         raise NotFoundException("Announcement")
+    from sqlalchemy import select
+    from kb_biz.models.role import UserRole, Role
+    role_query = await session.execute(
+        select(Role.code).join(UserRole).where(UserRole.user_id == _user.id)
+    )
+    user_role_codes = [row[0] for row in role_query]
+    if not _check_announcement_scope_access(user_role_codes, a.scope, _user.dept_id, a.dept_id):
+        raise ForbiddenException("You can only manage announcements within your scope")
     await session.delete(a)
     await _publish_announcement_event("deleted")
     return Response(data=None)
+
+
+@router.get("/announcements/{announcement_id}/read-stats", response_model=Response[AnnouncementReadStatsResponse])
+async def get_announcement_read_stats(
+    announcement_id: uuid.UUID,
+    session: AsyncSession = Depends(get_session),
+    _user: User = Depends(PermissionChecker(["system.config"])),
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+):
+    """Get read receipt stats for an announcement."""
+    a = await session.get(Announcement, announcement_id)
+    if not a:
+        raise NotFoundException("Announcement")
+
+    from sqlalchemy import func
+    from kb_biz.models.department import Department
+    from kb_biz.models.user import User
+
+    # Count total readers
+    count_query = await session.execute(
+        select(func.count()).select_from(AnnouncementRead).where(AnnouncementRead.announcement_id == announcement_id)
+    )
+    total_read: int = count_query.scalar() or 0
+
+    # Get reader details (paginated)
+    readers_query = await session.execute(
+        select(
+            AnnouncementRead.user_id,
+            User.display_name,
+            Department.name.label("dept_name"),
+            AnnouncementRead.read_at,
+        )
+        .join(User, AnnouncementRead.user_id == User.id)
+        .outerjoin(Department, User.dept_id == Department.id)
+        .where(AnnouncementRead.announcement_id == announcement_id)
+        .order_by(AnnouncementRead.read_at.desc())
+        .offset(offset)
+        .limit(limit)
+    )
+    has_more = total_read > offset + limit
+    readers = [
+        AnnouncementReaderInfo(
+            user_id=str(row.user_id),
+            display_name=row.display_name,
+            dept_name=row.dept_name,
+            read_at=row.read_at,
+        )
+        for row in readers_query
+    ]
+
+    return Response(
+        data=AnnouncementReadStatsResponse(
+            announcement_id=str(a.id),
+            announcement_title=a.title,
+            total_read=total_read,
+            has_more=has_more,
+            readers=readers,
+        )
+    )
 
 
 # ──────────────────────────────────────────────

@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
@@ -10,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { toast } from 'sonner'
 import { api } from '@/api/client'
-import { Pencil, Trash2, Users, KeyRound, RotateCcw } from 'lucide-react'
+import { Plus, Pencil, Trash2, Users, KeyRound, RotateCcw, Search } from 'lucide-react'
 
 export function UserPage() {
   const [users, setUsers] = useState<any[]>([])
@@ -30,6 +31,7 @@ export function UserPage() {
   const [newPassword, setNewPassword] = useState('')
   const [form, setForm] = useState({ username: '', password: '', display_name: '', email: '', phone: '', dept_id: '' })
   const [selectedRoles, setSelectedRoles] = useState<string[]>([])
+  const [deptError, setDeptError] = useState(false)
 
   const { user } = useAuth()
   const isSuperAdmin = user?.roles?.includes('super_admin')
@@ -81,6 +83,11 @@ export function UserPage() {
 
   const handleSave = async () => {
     try {
+      if (!form.dept_id) {
+        setDeptError(true)
+        return
+      }
+      setDeptError(false)
       let roleIds = selectedRoles
       if (!editing && roleIds.length === 0) {
         // Default to dept_viewer if no role selected
@@ -171,7 +178,7 @@ export function UserPage() {
           <p className="text-sm text-muted-foreground mt-1">管理系统中的用户账号</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button onClick={openCreate}>+ 新建用户</Button>
+          <Button onClick={openCreate}><Plus className="mr-1 h-3 w-3" />新建用户</Button>
         </div>
       </div>
       <div className="list-card">
@@ -215,7 +222,7 @@ export function UserPage() {
                 </SelectContent>
               </Select>
               <div className="flex items-center gap-2">
-                <Button variant="default" size="sm" className="h-8 text-xs shadow-sm" onClick={handleSearch}>搜索</Button>
+                <Button variant="default" size="sm" className="h-8 text-xs shadow-sm" onClick={handleSearch}><Search className="h-3 w-3 mr-1" />搜索</Button>
                 <Button variant="default" size="sm" className="h-8 text-xs shadow-sm" onClick={handleUserReset}>
                   <RotateCcw className="mr-1 h-3 w-3" />重置
                 </Button>
@@ -303,11 +310,11 @@ export function UserPage() {
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent key={String(dialogOpen)} className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-lg">{editing ? '编辑用户' : '新建用户'}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-2" autoComplete="off">
+          <div className="space-y-4 py-2">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-sm font-medium">用户名</Label>
@@ -322,7 +329,7 @@ export function UserPage() {
               {!editing && (
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">密码 <span className="text-xs text-muted-foreground font-normal">（留空默认 admin123）</span></Label>
-                  <Input type="password" autoComplete="new-password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="可选" autoComplete="new-password" className="focus-visible:ring-1" />
+                  <Input type="password" autoComplete="new-password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="可选" className="focus-visible:ring-1" />
                 </div>
               )}
               <div className="space-y-2">
@@ -336,14 +343,15 @@ export function UserPage() {
             </div>
             <div className="space-y-2">
               <Label className="text-sm font-medium">部门 <span className="text-destructive">*</span></Label>
-              <Select value={form.dept_id} onValueChange={(v) => setForm({ ...form, dept_id: v })}>
-                <SelectTrigger><SelectValue placeholder="选择部门" /></SelectTrigger>
+              <Select value={form.dept_id} onValueChange={(v) => { setForm({ ...form, dept_id: v }); setDeptError(false) }}>
+                <SelectTrigger className={deptError ? 'border-destructive ring-destructive/30' : ''}><SelectValue placeholder="选择部门" /></SelectTrigger>
                 <SelectContent>
                   {departments.filter((d: any) => d.id !== '00000000-0000-0000-0000-000000000000').map((d: any) => (
                     <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              {deptError && <p className="text-xs text-destructive">请选择部门</p>}
             </div>
             {(() => {
               const allowedRoleCodes = isSuperAdmin
@@ -360,12 +368,12 @@ export function UserPage() {
               const isSelf = editing && user && editing.id === user.id
               return visibleRoles.length > 0 ? (
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">角色 <span className="text-destructive">*</span></Label>
+                  <Label className="text-sm font-medium">角色 <span className="text-xs text-muted-foreground font-normal">（未选默认 dept_viewer）</span></Label>
                   <div className="border rounded-lg p-3 space-y-1.5 bg-muted/20">
                     {isSelf && <p className="text-xs text-muted-foreground mb-1">不能修改自己的角色</p>}
                     {visibleRoles.map((r: any) => (
                       <label key={r.id} className={`flex items-center gap-2.5 py-1 px-1 text-sm rounded transition-colors ${isSelf ? '' : 'hover:bg-background cursor-pointer'}`}>
-                        <input type="checkbox" checked={selectedRoles.includes(r.id)} onChange={() => toggleRole(r.id)} disabled={isSelf} className="h-4 w-4 rounded border-primary text-primary focus:ring-primary disabled:opacity-50" />
+                        <Checkbox checked={selectedRoles.includes(r.id)} onCheckedChange={() => toggleRole(r.id)} disabled={isSelf} />
                         {r.name}
                       </label>
                     ))}

@@ -12,7 +12,16 @@ COPY server/scripts/ /app/scripts/
 
 RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
 
-# Editable packages + runtime deps
+# ── CPU-only torch FIRST ──
+# kb-core → llama-index-embeddings-huggingface → sentence-transformers → torch.
+# If torch isn't pre-installed, pip resolves CUDA torch (427MB) + nvidia toolkit (~3GB).
+# Install --no-deps to prevent torch from pulling nvidia-* packages.
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --no-cache-dir \
+        torch --index-url https://download.pytorch.org/whl/cpu --no-deps
+
+# ── Editable packages + runtime deps ──
+# torch is already present, so pip won't re-resolve the CUDA version.
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --no-cache-dir \
         -e packages/kb-core \
@@ -25,15 +34,11 @@ RUN --mount=type=cache,target=/root/.cache/pip \
         redis python-json-logger httpx tenacity jieba email-validator \
         minio openpyxl aio-pika greenlet pymilvus 'bcrypt<4.1'
 
-# Worker ML dependencies (document parsing + embedding)
-# CPU-only torch to avoid downloading 1GB+ of NVIDIA GPU libraries
+# ── Document parsing deps ──
+# torch already present, sentence-transformers skips re-resolution.
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --no-cache-dir \
-        torch --index-url https://download.pytorch.org/whl/cpu
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-cache-dir \
-        python-docx python-pptx \
-        sentence-transformers
+        sentence-transformers python-docx python-pptx
 
 # ═══════════════════════════════════════════════
 #  RUNTIME STAGE — minimal production image
@@ -55,6 +60,9 @@ COPY server/backend/ /app/
 RUN rm -rf /app/packages/kb-biz/.venv /app/packages/kb-core/.venv 2>/dev/null; \
     find /usr/local/lib/python3.11 -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null; \
     find /usr/local/lib/python3.11 -name '*.pyc' -delete 2>/dev/null; \
+    rm -rf /usr/local/lib/python3.11/site-packages/torch/include \
+           /usr/local/lib/python3.11/site-packages/torch/lib/libtorch_cuda* \
+           /usr/local/lib/python3.11/site-packages/triton 2>/dev/null; \
     pip uninstall -y pip setuptools 2>/dev/null; true
 
 RUN chmod +x /app/docker-entrypoint.sh

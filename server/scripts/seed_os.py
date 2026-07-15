@@ -138,7 +138,8 @@ async def seed_menus(session: AsyncSession) -> None:
         Menu(name="角色管理", path="/admin/roles", icon="Shield", permission_code="role.read", parent_id=sys_mgmt.id, sort_order=1),
         Menu(name="用户管理", path="/admin/users", icon="Users", permission_code="user.read", parent_id=sys_mgmt.id, sort_order=2),
         Menu(name="模型配置", path="/admin/models", icon="Cpu", permission_code="llm_config.read", parent_id=sys_mgmt.id, sort_order=3),
-        Menu(name="系统设置", path="/admin/settings", icon="Settings", permission_code="system.config", parent_id=sys_mgmt.id, sort_order=4),
+        Menu(name="系统公告", path="/admin/announcements", icon="Megaphone", permission_code=None, parent_id=sys_mgmt.id, sort_order=4),
+        Menu(name="系统设置", path="/admin/settings", icon="Settings", permission_code="system.config", parent_id=sys_mgmt.id, sort_order=5),
     ]
     session.add_all(sys_children)
     all_menus = menu_items + [sys_mgmt] + sys_children
@@ -155,7 +156,7 @@ async def seed_menus(session: AsyncSession) -> None:
             session.add(RoleMenu(role_id=admin_role.id, menu_id=m.id))
 
     # Assign menus per-role
-    dept_admin_menus = [menu_items[0], menu_items[1], menu_items[2], menu_items[3], sys_mgmt] + [sys_children[0], sys_children[2]]  # 首页,智能问答,知识库,操作日志,系统管理 → 部门管理,用户管理
+    dept_admin_menus = [menu_items[0], menu_items[1], menu_items[2], menu_items[3], sys_mgmt] + [sys_children[0], sys_children[2], sys_children[4], sys_children[5]]  # 部门管理,用户管理,系统公告,系统设置
     dept_editor_menus = [menu_items[0], menu_items[1], menu_items[2], menu_items[3]]
     dept_viewer_menus = [menu_items[0], menu_items[1]]
 

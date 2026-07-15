@@ -311,6 +311,22 @@ class ApiClient {
     return this.request<ApiResponse<null>>('DELETE', `/admin/announcements/${id}`)
   }
 
+  getAnnouncementReadStats(id: string, params?: { limit?: number; offset?: number }) {
+    const qs = params ? '?' + new URLSearchParams({ limit: String(params.limit ?? 50), offset: String(params.offset ?? 0) }).toString() : ''
+    return this.request<ApiResponse<{
+      announcement_id: string
+      announcement_title: string
+      total_read: number
+      has_more: boolean
+      readers: Array<{
+        user_id: string
+        display_name: string
+        dept_name: string | null
+        read_at: string
+      }>
+    }>>('GET', `/admin/announcements/${id}/read-stats${qs}`)
+  }
+
   // Health
   async health() {
     const response = await fetch('/health')

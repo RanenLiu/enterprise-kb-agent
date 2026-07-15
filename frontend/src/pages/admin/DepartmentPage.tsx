@@ -10,7 +10,7 @@ import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { toast } from 'sonner'
 import { api } from '@/api/client'
 import { useAuth } from '@/hooks/useAuth'
-import { Pencil, Trash2, Building2 } from 'lucide-react'
+import { Plus, Pencil, Trash2, Building2 } from 'lucide-react'
 
 export function DepartmentPage() {
   const { user } = useAuth()
@@ -187,7 +187,7 @@ export function DepartmentPage() {
           <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
           <p className="text-sm text-muted-foreground mt-1">管理系统中的部门组织架构</p>
         </div>
-        <Button onClick={openCreate}>+ 新建部门</Button>
+        <Button onClick={openCreate}><Plus className="mr-1 h-3 w-3" />新建部门</Button>
       </div>
       <div className="list-card">
         <Card className="admin-table border shadow-sm">

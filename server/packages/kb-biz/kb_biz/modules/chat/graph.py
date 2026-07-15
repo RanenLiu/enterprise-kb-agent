@@ -220,17 +220,21 @@ async def run_agent(
     if state.metadata.get("low_confidence"):
         skip_intent = False
         logger.info("Low confidence override: forcing retrieval")
-    # general_chat 意图下，用 jieba 自动识别查询中是否含文档相关实体词
-    # 有实体词（非停用词、长度>=2）说明用户可能在问文档内容，不走跳过
+    # general_chat 意图下，用 embedding 语义匹配判断是否真的是闲聊。
+    # 如果 embedding 接近已知闲聊查询的质心 → 确实闲聊，跳过检索。
+    # 如果 embedding 远离质心 → 可能是 LLM 误分类（实际是知识查询），走 tool_selector 二次确认。
     is_general_chat = state.intent == "general_chat"
-    if is_general_chat and len(query_text) >= 4:
-        try:
-            import jieba
-            from kb_core.rag.fulltext.pg import _STOP_WORDS
-            words = jieba.lcut(query_text)
-            has_content = any(len(w) >= 2 and w not in _STOP_WORDS for w in words)
-        except Exception:
-            has_content = False
+    if is_general_chat:
+        query_emb = state.metadata.get("query_embedding")
+        if query_emb is not None:
+            try:
+                from kb_biz.modules.chat.intent_classifier import is_chat_embedding
+
+                has_content = not is_chat_embedding(query_emb)
+            except Exception:
+                has_content = True
+        else:
+            has_content = True  # 无 embedding，安全起见走 tool_selector
     else:
         has_content = True
     logger.info("Tool selection: intent=%s skip=%s general_chat=%s has_content=%s query=%s", state.intent, skip_intent, is_general_chat, has_content, query_text[:50])

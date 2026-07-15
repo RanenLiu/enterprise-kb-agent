@@ -293,6 +293,8 @@ class AnnouncementResponse(BaseModel):
     is_active: bool
     expires_at: Optional[datetime] = None
     created_by: Optional[str] = None
+    tenant_id: Optional[str] = None
+    dept_id: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 
@@ -314,3 +316,18 @@ class AnnouncementUpdate(BaseModel):
     content: Optional[str] = None
     is_active: Optional[bool] = None
     expires_at: Optional[datetime] = None
+
+
+class AnnouncementReaderInfo(BaseModel):
+    user_id: str
+    display_name: str
+    dept_name: Optional[str] = None
+    read_at: datetime
+
+
+class AnnouncementReadStatsResponse(BaseModel):
+    announcement_id: str
+    announcement_title: str
+    total_read: int
+    has_more: bool = False
+    readers: list[AnnouncementReaderInfo]

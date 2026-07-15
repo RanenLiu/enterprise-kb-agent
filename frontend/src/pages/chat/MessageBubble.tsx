@@ -113,7 +113,7 @@ export function MessageBubble({ message, chunks, isStreaming, isLastUser, onEdit
             <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
             {message.created_at && (
               <div className="flex items-center justify-end gap-2 mt-1">
-                <p className="text-[10px] text-foreground/40">{new Date(message.created_at).toLocaleString()}</p>
+                <p className="text-[10px] text-foreground/40">{new Date(message.created_at).toLocaleString("zh-CN", { hour12: false })}</p>
                 <button onClick={() => { navigator.clipboard.writeText(message.content); toast.success('已复制') }}
                   className="text-[10px] text-foreground/30 hover:text-foreground/60 transition-colors cursor-pointer"
                   title="复制内容">
@@ -150,7 +150,7 @@ export function MessageBubble({ message, chunks, isStreaming, isLastUser, onEdit
             {chunks && chunks.length > 0 && <SourceInfo chunks={chunks} />}
             {message.created_at && !isStreaming && (
               <div className="flex items-center gap-2 mt-1">
-                <p className="text-[10px] text-foreground/40">{new Date(message.created_at).toLocaleString()}</p>
+                <p className="text-[10px] text-foreground/40">{new Date(message.created_at).toLocaleString("zh-CN", { hour12: false })}</p>
                 <button onClick={() => { navigator.clipboard.writeText(message.content); toast.success('已复制') }}
                   className="text-[10px] text-foreground/30 hover:text-foreground/60 transition-colors cursor-pointer"
                   title="复制内容">

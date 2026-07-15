@@ -145,17 +145,19 @@ async def tool_selector(state: AgentState, llm: LLMClient) -> dict[str, Any]:
                         logger.info("Injected doc_ids into retrieve_knowledge: %s", doc_ids)
 
     if not tool_calls:
-        # LLM 认为不需要工具。用 jieba 判断查询中是否有实体词（非停用词、长度>=2）
-        # 有实体词说明用户在问文档相关内容，强制检索
-        try:
-            import jieba
-            from kb_core.rag.fulltext.pg import _STOP_WORDS
-            words = jieba.lcut(query)
-            has_entities = any(len(w) >= 2 and w not in _STOP_WORDS for w in words)
-        except Exception:
-            has_entities = False
-        if has_entities:
-            logger.info("Force retrieve_knowledge for query (jieba entities): %s", query[:60])
+        # LLM 认为不需要工具。用 embedding 语义匹配判断是否明显是闲聊。
+        # 不是明显闲聊 → 可能是有文档查询意图 → 强制检索。
+        query_emb = state.metadata.get("query_embedding")
+        is_chat = False
+        if query_emb is not None:
+            try:
+                from kb_biz.modules.chat.intent_classifier import is_chat_embedding
+
+                is_chat = is_chat_embedding(query_emb)
+            except Exception:
+                is_chat = False
+        if not is_chat:
+            logger.info("Force retrieve_knowledge for query (embedding not chat): %s", query[:60])
             force_args = {"query": query}
             # 强制路径也注入跨轮 doc_context
             if doc_context:
@@ -201,15 +203,17 @@ async def tool_selector(state: AgentState, llm: LLMClient) -> dict[str, Any]:
 
     # 兜底：LLM 只查了文档名但没检索内容时，补调 retrieve_knowledge
     if not has_search:
-        try:
-            import jieba
-            from kb_core.rag.fulltext.pg import _STOP_WORDS
-            _words = jieba.lcut(query)
-            _has_entities = any(len(w) >= 2 and w not in _STOP_WORDS for w in _words)
-        except Exception:
-            _has_entities = False
-        if has_docs or _has_entities:
-            logger.info("Fallback retrieve_knowledge (has_docs=%s has_entities=%s)", has_docs, _has_entities)
+        _is_chat = False
+        query_emb = state.metadata.get("query_embedding")
+        if query_emb is not None:
+            try:
+                from kb_biz.modules.chat.intent_classifier import is_chat_embedding
+
+                _is_chat = is_chat_embedding(query_emb)
+            except Exception:
+                _is_chat = False
+        if has_docs or not _is_chat:
+            logger.info("Fallback retrieve_knowledge (has_docs=%s is_chat=%s)", has_docs, _is_chat)
             fallback_args: dict[str, Any] = {"query": query}
             # 优先使用当前轮 query_documents 查到的 doc_ids（新对话第一轮）
             if current_query_doc_ids:
