@@ -30,12 +30,18 @@
 git clone https://github.com/RanenLiu/enterprise-kb-agent.git
 cd enterprise-kb-agent
 
+# 配置 LLM API Key（至少一个）
+cp server/.env.example server/.env
+# 编辑 server/.env，设置 LLM_API_KEY（DeepSeek / OpenAI 等）
+
 # 启动所有服务
 docker compose up -d
 
 # 访问 Web 界面
 open http://localhost:5173
 ```
+
+> Docker 方式下数据库、缓存等连接地址由 `docker-compose.yml` 自动配置，`.env` 只需填写 LLM API Key 等敏感信息即可。
 
 默认管理员：`admin` / `admin123`
 
@@ -123,6 +129,7 @@ docker-compose.yml
 >   - [BAAI/bge-m3](https://www.modelscope.cn/models/BAAI/bge-m3)  
 >   - [BAAI/bge-reranker-v2-m3](https://www.modelscope.cn/models/BAAI/bge-reranker-v2-m3)  
 > - **离线/隔离环境**：提前下载模型文件（通过 HF 或 ModelScope），挂载到 `/models` 目录，设置 `EMBEDDING_MODEL=/models/BAAI/bge-m3` 即可。  
+> - **开发阶段**可使用收费 API 快速验证（如 DeepSeek、通义千问），**生产环境私有化部署**建议使用 Ollama / vLLM / Xinference 等本地推理框架部署大模型和嵌入模型，确保数据不出容器。  
 > - **LLM（对话）API** 是独立配置项，数据安全考量请参考下方的 LLM 配置指南。
 
 详细 LLM 配置请参考 [LLM 配置指南](docs/llm-config.zh-CN.md)。
@@ -143,14 +150,33 @@ docker-compose.yml
 
 ## 开发
 
+如果你需要修改代码、热重载调试，采用混合模式：基础设施用 Docker 运行，后端和前端在本地启动。
+
+依赖服务（PostgreSQL、Redis、MinIO、Milvus）需要提前启动，如需文档处理功能再加 RabbitMQ：
+
+```bash
+# 启动基础设施（PostgreSQL、Redis、MinIO、Milvus）
+docker compose up -d postgres redis minio etcd milvus
+
+# 如需文档处理（worker），增加 rabbitmq
+# docker compose up -d postgres redis minio etcd milvus rabbitmq
+```
+
+首次搭建开发环境可用 `server/scripts/setup_dev.sh` 快速安装依赖和启动基础设施。
+如需彻底重置环境（清空数据库并重建容器），可运行 `server/scripts/reset-env.sh`。
+
 ```bash
 # 后端
-cd server && pip install -e packages/kb-core -e packages/kb-biz -e packages/kb-adapter-postgres
+cd server
+cp server/.env.example server/.env  # 已配好 localhost，无需修改
+pip install -e packages/kb-core -e packages/kb-biz -e packages/kb-adapter-postgres
 uvicorn backend.main:app --reload
 
 # 前端
 cd frontend && pnpm install && pnpm dev
 ```
+
+开发完成后如需 Docker 部署，参考[快速开始](#快速开始)。
 
 ---
 

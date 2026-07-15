@@ -26,12 +26,18 @@ Company documents live in scattered shared folders — contracts, policies, tech
 git clone https://github.com/RanenLiu/enterprise-kb-agent.git
 cd enterprise-kb-agent
 
+# Configure LLM API Key (at least one provider)
+cp server/.env.example server/.env
+# Edit server/.env, set LLM_API_KEY (DeepSeek / OpenAI, etc.)
+
 # Start all services
 docker compose up -d
 
 # Access the web UI
 open http://localhost:5173
 ```
+
+> In Docker mode, database and cache connection URLs are pre-configured in `docker-compose.yml`. You only need to set your LLM API Key in `.env`.
 
 Default admin account: `admin` / `admin123`
 
@@ -122,6 +128,7 @@ Key environment variables (`.env`):
 >   - [BAAI/bge-m3](https://www.modelscope.cn/models/BAAI/bge-m3)  
 >   - [BAAI/bge-reranker-v2-m3](https://www.modelscope.cn/models/BAAI/bge-reranker-v2-m3)  
 > - **Offline / air-gapped**: Pre-download models (via HF or ModelScope) and mount them to `/models`, then set `EMBEDDING_MODEL=/models/BAAI/bge-m3`.  
+> - **Development**: paid APIs (DeepSeek, Qwen, etc.) are fine for prototyping. **For production private deployment**, use local inference frameworks like Ollama / vLLM / Xinference for both LLM and embedding models — data never leaves the container.  
 > - **LLM (chat) APIs** are a separate concern — see the LLM config guide below for provider setup and data-security considerations.
 
 See [LLM Configuration Guide](docs/llm-config.md) for provider-specific LLM setup.
@@ -142,14 +149,33 @@ See [LLM Configuration Guide](docs/llm-config.md) for provider-specific LLM setu
 
 ## Development
 
+For local development with hot-reload, use a hybrid approach: infrastructure runs in Docker, backend and frontend run natively.
+
+Dependencies (PostgreSQL, Redis, MinIO, Milvus) must be running first. RabbitMQ is needed for document processing (optional):
+
+```bash
+# Start infrastructure (PostgreSQL, Redis, MinIO, Milvus)
+docker compose up -d postgres redis minio etcd milvus
+
+# For document processing (worker), add rabbitmq
+# docker compose up -d postgres redis minio etcd milvus rabbitmq
+```
+
+For first-time setup, `server/scripts/setup_dev.sh` installs dependencies and starts infrastructure services.
+To reset the environment (wipe database and rebuild containers), run `server/scripts/reset-env.sh`.
+
 ```bash
 # Backend
-cd server && pip install -e packages/kb-core -e packages/kb-biz -e packages/kb-adapter-postgres
+cd server
+cp server/.env.example server/.env  # Already uses localhost, no changes needed
+pip install -e packages/kb-core -e packages/kb-biz -e packages/kb-adapter-postgres
 uvicorn backend.main:app --reload
 
 # Frontend
 cd frontend && pnpm install && pnpm dev
 ```
+
+When you're ready to deploy with Docker, refer back to [Quick Start](#quick-start).
 
 ---
 

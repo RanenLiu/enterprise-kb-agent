@@ -1,3 +1,4 @@
+
 #!/bin/bash
 # 完全重置开发环境（清空所有数据 + 重建容器）
 set -e
@@ -15,11 +16,10 @@ docker compose down
 echo "=== 4/5 重新构建镜像 ==="
 docker compose build backend frontend
 
-echo "=== 5/5 启动全部服务（会自动建表 + 种子数据） ==="
+echo "=== 5/5 启动全部服务 ==="
+echo "启动后自动执行：直接建表 + python -m scripts.seed_os（角色/菜单/管理员）"
 docker compose up -d --force-recreate
 
 echo ""
-echo "完成！后端启动后会自动执行："
-echo "  - alembic upgrade head（建表）"
-echo "  - seed_data.py（admin/admin123 超级管理员 + 角色 + 菜单）"
-echo "查看启动状态: docker compose logs backend --tail 20"
+echo "完成！查看启动状态: docker compose logs backend --tail 20"
+echo "默认管理员: admin / admin123"
