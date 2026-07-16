@@ -168,6 +168,7 @@ docker compose up -d postgres redis minio etcd milvus
 ```bash
 # 后端
 cd server
+python3 -m venv .venv && source .venv/bin/activate
 cp .env.example .env  # 已配好 localhost，无需修改
 pip install -r requirements.txt
 pip install -e packages/kb-core -e packages/kb-biz -e packages/kb-adapter-postgres

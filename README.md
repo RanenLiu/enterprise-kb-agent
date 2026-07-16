@@ -167,6 +167,7 @@ To reset the environment (wipe database and rebuild containers), run `server/scr
 ```bash
 # Backend
 cd server
+python3 -m venv .venv && source .venv/bin/activate
 cp .env.example .env  # Already uses localhost, no changes needed
 pip install -r requirements.txt
 pip install -e packages/kb-core -e packages/kb-biz -e packages/kb-adapter-postgres
