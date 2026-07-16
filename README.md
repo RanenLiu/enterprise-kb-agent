@@ -116,10 +116,10 @@ Key environment variables (`.env`):
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `DATABASE_URL` | `postgresql+asyncpg://kbuser:kbpass@postgres:5432/enterprise_kb` | PostgreSQL connection |
-| `REDIS_URL` | `redis://redis:6379/0` | Redis connection |
-| `MILVUS_HOST` | `milvus` | Milvus hostname |
-| `MINIO_ENDPOINT` | `minio:9000` | MinIO S3 endpoint |
+| `DATABASE_URL` | `postgresql+asyncpg://kbuser:kbpass@localhost:5432/enterprise_kb` | PostgreSQL connection |
+| `REDIS_URL` | `redis://localhost:6379/0` | Redis connection |
+| `MILVUS_HOST` | `localhost` | Milvus hostname |
+| `MINIO_ENDPOINT` | `localhost:9000` | MinIO S3 endpoint |
 | `EMBEDDING_MODEL` | `BAAI/bge-m3` | Embedding model (HF auto-download) |
 | `RERANK_MODEL` | `BAAI/bge-reranker-v2-m3` | Reranker model |
 

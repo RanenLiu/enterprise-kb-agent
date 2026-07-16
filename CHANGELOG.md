@@ -3,6 +3,25 @@
 ## [未发布]
 
 ### 新增
+- 系统公告独立菜单项: 从系统设置拆分为独立页面（`/admin/announcements`），种子数据新增公告菜单
+- 公告已读统计: 管理员可查看谁何时阅读了公告，支持分页加载
+- 公告编辑重新推送: 编辑后自动清除其他用户已读标记
+- 公告列表日期筛选: DateTimePicker + 搜索/重置
+- `server/.env.example`: 环境变量模板（localhost 配置）
+
+### 修复
+- 公告部门隔离: `list_announcements`/`unread-count` scope 过滤独立于 `show_all`，dept_admin 只能看本部门公告
+- 公告跨部门权限: `_check_announcement_scope_access` 增加 dept_id 匹配，实现部门间公告隔离
+- 公告编辑 500 错误: MissingGreenlet — flush 后补 `session.refresh(a)`
+- 发布者未读问题: 创建公告时自动插入已读记录
+- 铃铛/列表已读不同步: 自定义事件 `announcement-read-changed` 双端同步
+- 二级菜单刷新不展开: `AppSidebar` find 逻辑排除首页 `path=/` 前缀匹配
+- pydantic-settings 测试收集失败: `kb_core/config.py` 加 `extra="ignore"`
+- 搜索/新建按钮图标统一: Search 放大镜 + Plus 图标 + mr-1 间距
+- 全站时间统一 24 小时制: 所有 `toLocaleString` 加 `hour12: false`
+- LICENSE 修正: 替换为 Apache 2.0，原闭源许可证移至 LICENSE.enterprise
+
+### 新增
 - LlamaIndex 检索管线: HuggingFaceEmbedding(bge-m3) + SentenceTransformerRerank，替代自定义向量检索和重排
 - 检索增强策略: HyDE(假设文档嵌入)、QueryFusion(多视角查询)、StepDecomp(多步分解)，config 开关控制
 - BM25 中文重排回归: jieba 分词在 RRF 融合后重打分，防止 RRF 摊平精确匹配

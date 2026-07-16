@@ -117,10 +117,10 @@ docker-compose.yml
 
 | 变量 | 默认值 | 说明 |
 |----------|---------|-------------|
-| `DATABASE_URL` | `postgresql+asyncpg://kbuser:kbpass@postgres:5432/enterprise_kb` | PostgreSQL 连接 |
-| `REDIS_URL` | `redis://redis:6379/0` | Redis 连接 |
-| `MILVUS_HOST` | `milvus` | Milvus 主机名 |
-| `MINIO_ENDPOINT` | `minio:9000` | MinIO S3 端点 |
+| `DATABASE_URL` | `postgresql+asyncpg://kbuser:kbpass@localhost:5432/enterprise_kb` | PostgreSQL 连接 |
+| `REDIS_URL` | `redis://localhost:6379/0` | Redis 连接 |
+| `MILVUS_HOST` | `localhost` | Milvus 主机名 |
+| `MINIO_ENDPOINT` | `localhost:9000` | MinIO S3 端点 |
 | `EMBEDDING_MODEL` | `BAAI/bge-m3` | 嵌入模型 |
 | `RERANK_MODEL` | `BAAI/bge-reranker-v2-m3` | 重排模型 |
 
