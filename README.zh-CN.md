@@ -168,7 +168,7 @@ docker compose up -d postgres redis minio etcd milvus
 ```bash
 # 后端
 cd server
-cp server/.env.example server/.env  # 已配好 localhost，无需修改
+cp .env.example .env  # 已配好 localhost，无需修改
 pip install -r requirements.txt
 pip install -e packages/kb-core -e packages/kb-biz -e packages/kb-adapter-postgres
 python -m scripts.seed_os  # 首次初始化数据库
