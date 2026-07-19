@@ -55,21 +55,16 @@ pnpm build
 
 | 路由 | 页面 | 说明 |
 |------|------|------|
-| `/login` | 登录 | 验证码 + 表单验证 |
-| `/register` | 注册 | 创建新租户 |
+| `/login` | 登录 | 认证 |
 | `/chat` | 智能问答 | SSE 流式对话 |
+| `/chat/:id` | 对话详情 | 会话历史 |
 | `/knowledge` | 知识库 | 文档管理 |
-| `/knowledge/:docId/graph` | 知识图谱 | 实体关系可视化 |
-| `/admin` | 仪表盘 | 系统概览 |
-| `/admin/tenants` | 租户管理 | 超管可见 |
-| `/admin/departments` | 部门管理 | |
-| `/admin/roles` | 角色管理 | |
-| `/admin/users` | 用户管理 | 含 EP 工号自动生成 + Excel 批量导入 |
-| `/admin/menus` | 菜单管理 | |
-| `/admin/logs` | 操作日志 / 登录日志 | |
-| `/admin/monitor` | 系统监控 | 服务状态 |
-| `/admin/models` | 模型配置 | LLM 配置管理 |
-| `/admin/settings` | 系统设置 | |
+| `/admin/departments` | 部门管理 | CRUD、成员管理 |
+| `/admin/roles` | 角色管理 | CRUD、权限分配 |
+| `/admin/users` | 用户管理 | CRUD、角色分配 |
+| `/admin/logs` | 操作日志 | 审计记录（操作 & 登录） |
+| `/admin/models` | 模型配置 | LLM 模型设置 |
+| `/admin/settings` | 系统设置 | 系统配置 |
 
 ## UI 特性
 
