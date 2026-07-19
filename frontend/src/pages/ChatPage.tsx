@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useChat } from '@/pages/chat/hooks/useChat'
 import { ChatSidebar } from '@/pages/chat/ChatSidebar'
 import { ChatMessages } from '@/pages/chat/ChatMessages'
@@ -9,7 +9,7 @@ import { useIsMobile } from '@/hooks/use-mobile'
 
 export function ChatPage() {
   const {
-    sessions, currentSessionId, messages, chunksByMsg, graphByMsg, streamingText, streamingReasoning, status, isLoading,
+    sessions, sessionsLoaded, currentSessionId, messages, chunksByMsg, graphByMsg, streamingText, streamingReasoning, status, isLoading,
     deepThinking, toggleDeepThinking,
     editingMsgId, editContent,
     startEdit, setEditContent, submitEdit, cancelEdit,
@@ -18,6 +18,7 @@ export function ChatPage() {
   } = useChat()
   const isMobile = useIsMobile()
   const [showSessions, setShowSessions] = useState(false)
+  const hasAttemptedCreate = useRef(false)
 
   // 初始化：加载列表后默认选中第一个会话
   useEffect(() => {
@@ -25,10 +26,14 @@ export function ChatPage() {
   }, [loadSessions])
 
   useEffect(() => {
+    if (!sessionsLoaded) return
     if (sessions.length > 0 && !currentSessionId) {
       selectSession(sessions[0].id)
+    } else if (sessions.length === 0 && !currentSessionId && !hasAttemptedCreate.current) {
+      hasAttemptedCreate.current = true
+      createSession().then(id => selectSession(id))
     }
-  }, [sessions, currentSessionId, selectSession])
+  }, [sessionsLoaded, sessions, currentSessionId, selectSession, createSession])
 
   const handleCreateSession = async () => {
     const id = await createSession()

@@ -16,6 +16,7 @@ interface CitationsData {
 
 interface UseChatReturn {
   sessions: ChatSession[]
+  sessionsLoaded: boolean
   currentSessionId: string | null
   messages: ChatMessage[]
   chunksByMsg: Record<string, RetrievalChunk[]>
@@ -43,6 +44,7 @@ interface UseChatReturn {
 
 export function useChat(): UseChatReturn {
   const [sessions, setSessions] = useState<ChatSession[]>([])
+  const [sessionsLoaded, setSessionsLoaded] = useState(false)
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [chunksByMsg, setChunksByMsg] = useState<Record<string, RetrievalChunk[]>>({})
@@ -70,6 +72,7 @@ export function useChat(): UseChatReturn {
   const loadSessions = useCallback(async () => {
     const res = await api.listSessions()
     setSessions(res.data)
+    setSessionsLoaded(true)
   }, [])
 
   const selectSession = useCallback(async (id: string) => {
@@ -286,7 +289,7 @@ export function useChat(): UseChatReturn {
   }, [editContent, editingMsgId, currentSessionId, messages, sendMessage])
 
   return {
-    sessions, currentSessionId, messages, chunksByMsg, graphByMsg, streamingText, streamingReasoning, status, isLoading,
+    sessions, sessionsLoaded, currentSessionId, messages, chunksByMsg, graphByMsg, streamingText, streamingReasoning, status, isLoading,
     deepThinking, toggleDeepThinking,
     editingMsgId, editContent,
     startEdit, setEditContent, submitEdit, cancelEdit,
