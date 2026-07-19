@@ -172,7 +172,8 @@ python3 -m venv .venv && source .venv/bin/activate
 cp .env.example .env  # 已配好 localhost，无需修改
 pip install -r requirements.txt
 pip install -e packages/kb-core -e packages/kb-biz -e packages/kb-adapter-postgres
-python -m scripts.seed_os  # 首次初始化数据库
+python -m scripts.create_tables  # 首次创建表
+python -m scripts.seed_os  # 初始化数据库
 uvicorn backend.main:app --reload
 
 # 前端
