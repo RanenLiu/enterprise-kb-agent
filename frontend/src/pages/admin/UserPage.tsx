@@ -174,26 +174,25 @@ export function UserPage() {
     <div className="list-page animate-fade-in">
       <div className="list-header flex items-center justify-between shrink-0">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">用户管理</h1>
-          <p className="text-sm text-muted-foreground mt-1">管理系统中的用户账号</p>
+          <h1 className="text-2xl font-bold tracking-tight text-balance">用户管理</h1>
+          <p className="text-sm text-muted-foreground/70 mt-0.5">管理系统中的用户账号</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button onClick={openCreate}><Plus className="mr-1 h-3 w-3" />新建用户</Button>
+          <Button onClick={openCreate}><Plus className="mr-1 h-3 w-3" aria-hidden="true" aria-hidden="true" />新建用户</Button>
         </div>
       </div>
       <div className="list-card">
         <Card className="admin-table border shadow-sm">
-          <CardHeader className="bg-muted/30 border-b pb-3">
+          <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <Users className="h-4 w-4 text-primary" />
                 用户列表
-                
               </CardTitle>
             </div>
-            <div className="flex items-center gap-2 mt-3 flex-wrap">
+            <div className="flex items-center gap-2 mt-3 flex-wrap filter-bar">
               <Input
-                placeholder="搜索用户名/姓名..."
+                placeholder="搜索用户名/姓名…" autoComplete="off"
                 className="h-8 w-48 text-xs"
                 value={searchKeyword}
                 onChange={(e) => setSearchKeyword(e.target.value)}
@@ -222,7 +221,7 @@ export function UserPage() {
                 </SelectContent>
               </Select>
               <div className="flex items-center gap-2">
-                <Button variant="default" size="sm" className="h-8 text-xs shadow-sm" onClick={handleSearch}><Search className="h-3 w-3 mr-1" />搜索</Button>
+                <Button variant="default" size="sm" className="h-8 text-xs shadow-sm" onClick={handleSearch}><Search className="h-3 w-3 mr-1" aria-hidden="true" />搜索</Button>
                 <Button variant="default" size="sm" className="h-8 text-xs shadow-sm" onClick={handleUserReset}>
                   <RotateCcw className="mr-1 h-3 w-3" />重置
                 </Button>
@@ -245,7 +244,7 @@ export function UserPage() {
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow><TableCell colSpan={7} className="text-center py-12 text-muted-foreground animate-pulse">加载中...</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={7} className="text-center py-12 text-muted-foreground animate-pulse">加载中…</TableCell></TableRow>
                 ) : filteredUsers.length === 0 ? (
                   <TableRow><TableCell colSpan={7} className="text-center py-12 text-muted-foreground">暂无用户数据</TableCell></TableRow>
                 ) : pagedUsers.map((u, idx) => (
@@ -273,9 +272,9 @@ export function UserPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-0.5">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(u)}><Pencil className="h-3.5 w-3.5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(u)}><Pencil className="h-3.5 w-3.5" aria-hidden="true" /></Button>
                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setResetPwdUser(u); setNewPassword(''); setResetPwdOpen(true) }} title="重置密码"><KeyRound className="h-3.5 w-3.5" /></Button>
-                        {u.id !== user?.id && <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive/70 hover:text-destructive" onClick={() => setDeleteTarget(u.id)}><Trash2 className="h-3.5 w-3.5" /></Button>}
+                        {u.id !== user?.id && <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive/70 hover:text-destructive" onClick={() => setDeleteTarget(u.id)}><Trash2 className="h-3.5 w-3.5" aria-hidden="true" /></Button>}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -310,7 +309,7 @@ export function UserPage() {
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent key={String(dialogOpen)} className="sm:max-w-lg">
+        <DialogContent key={String(dialogOpen)} className="sm:max-w-lg admin-dialog">
           <DialogHeader>
             <DialogTitle className="text-lg">{editing ? '编辑用户' : '新建用户'}</DialogTitle>
           </DialogHeader>
@@ -369,7 +368,7 @@ export function UserPage() {
               return visibleRoles.length > 0 ? (
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">角色 <span className="text-xs text-muted-foreground font-normal">（未选默认 dept_viewer）</span></Label>
-                  <div className="border rounded-lg p-3 space-y-1.5 bg-muted/20">
+                  <div className="border rounded-lg p-3 space-y-1.5 bg-muted/10">
                     {isSelf && <p className="text-xs text-muted-foreground mb-1">不能修改自己的角色</p>}
                     {visibleRoles.map((r: any) => (
                       <label key={r.id} className={`flex items-center gap-2.5 py-1 px-1 text-sm rounded transition-colors ${isSelf ? '' : 'hover:bg-background cursor-pointer'}`}>
@@ -389,7 +388,7 @@ export function UserPage() {
       </Dialog>
 
       <Dialog open={resetPwdOpen} onOpenChange={setResetPwdOpen}>
-        <DialogContent className="sm:max-w-sm">
+        <DialogContent className="sm:max-w-sm admin-dialog">
           <DialogHeader>
             <DialogTitle className="text-lg">重置密码</DialogTitle>
           </DialogHeader>

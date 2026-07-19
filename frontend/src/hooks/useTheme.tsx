@@ -121,8 +121,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     root.classList.toggle('glass-mode', glass)
     root.classList.toggle('filled-icons', filledIcons)
     const ACCENT_COLORS: Record<Accent, { hue: string }> = {
-      blue: { hue: '265' }, violet: { hue: '285' }, emerald: { hue: '165' },
-      amber: { hue: '85' }, rose: { hue: '10' },
+      blue: { hue: '222' }, violet: { hue: '270' }, emerald: { hue: '158' },
+      amber: { hue: '40' }, rose: { hue: '348' },
     }
     root.style.setProperty('--accent-hue', ACCENT_COLORS[accent].hue)
   }, [theme, accent, glass, filledIcons])

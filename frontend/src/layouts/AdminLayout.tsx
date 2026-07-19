@@ -121,12 +121,15 @@ export function AdminLayout() {
     <SidebarProvider className="h-dvh overflow-hidden">
       <AppSidebar />
       <SidebarInset className="min-w-0">
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b glass px-4 sticky top-0 z-10">
-          <SidebarTrigger className="-ml-1 text-muted-foreground hover:text-foreground" />
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:z-50 focus:top-4 focus:left-4 focus:px-4 focus:py-2 focus:rounded-lg focus:bg-background focus:text-foreground focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-ring">
+          跳转到主内容
+        </a>
+        <header className={`flex h-14 shrink-0 items-center gap-2 px-4 sticky top-0 z-10 bg-background/80 backdrop-blur-xl border-b border-border/40 ${glass ? 'glass-header glass-edge-light' : ''}`}>
+          <SidebarTrigger className="-ml-1.5 text-muted-foreground hover:text-foreground transition-colors" />
           <nav className="flex items-center gap-1.5 text-sm text-muted-foreground">
             {breadcrumbs.map((crumb, i) => (
               <span key={crumb.path} className="flex items-center gap-1.5">
-                {i > 0 && <ChevronRight className="h-3.5 w-3.5" />}
+                {i > 0 && <ChevronRight className="h-3 w-3 text-muted-foreground/40" aria-hidden="true" />}
                 <span className={i === breadcrumbs.length - 1 ? 'text-foreground font-medium' : ''}>
                   {crumb.label}
                 </span>
@@ -136,9 +139,9 @@ export function AdminLayout() {
           <div className="flex-1" />
 
           {/* Accent color picker */}
-          <div ref={accentRef} className="relative">
-            <Button variant="ghost" size="icon" className={`h-9 w-9 rounded-full ${showAccents ? 'text-primary ring-2 ring-primary/30 ring-offset-1' : 'text-muted-foreground'}`} onClick={() => setShowAccents(!showAccents)}>
-              <Palette className="h-4 w-4" />
+          <div ref={accentRef} className="relative max-md:hidden">
+            <Button variant="ghost" size="icon" className={`h-9 w-9 rounded-full ${showAccents ? 'text-primary ring-2 ring-primary/30 ring-offset-1' : 'text-muted-foreground'}`} onClick={() => setShowAccents(!showAccents)} aria-label="主题色">
+              <Palette className="h-4 w-4" aria-hidden="true" />
             </Button>
             {showAccents && (
               <div className="absolute left-0 top-full mt-1.5 z-50 flex gap-3 p-2 rounded-xl border bg-popover shadow-xl">
@@ -154,7 +157,7 @@ export function AdminLayout() {
           </div>
 
           {/* Glass mode toggle */}
-          <Button variant="ghost" size="icon" className={`h-9 w-9 rounded-full ${glass ? 'text-primary bg-primary/10' : 'text-muted-foreground'}`} onClick={toggleGlass} title="玻璃质感">
+          <Button variant="ghost" size="icon" className={`h-9 w-9 rounded-full max-md:hidden ${glass ? 'text-primary bg-primary/10' : 'text-muted-foreground'}`} onClick={toggleGlass} aria-label="玻璃质感" title="玻璃质感">
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M4 20h16" />
               <rect x="6" y="4" width="12" height="12" rx="2" opacity="0.5" />
@@ -163,19 +166,19 @@ export function AdminLayout() {
           </Button>
 
           {/* Filled icons toggle */}
-          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-muted-foreground" onClick={toggleFilledIcons} title={filledIcons ? '实心图标' : '线条图标'}>
+          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-muted-foreground max-md:hidden" onClick={toggleFilledIcons} aria-label={filledIcons ? '实心图标' : '线条图标'} title={filledIcons ? '实心图标' : '线条图标'}>
             <PaintBucket className={`h-4 w-4 ${filledIcons ? 'fill-primary text-primary' : ''}`} />
           </Button>
 
           {/* Theme toggle */}
-          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-muted-foreground" onClick={toggleTheme}>
-            {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-muted-foreground" onClick={toggleTheme} aria-label={theme === 'light' ? '切换到深色模式' : '切换到浅色模式'}>
+            {theme === 'light' ? <Moon className="h-4 w-4" aria-hidden="true" /> : <Sun className="h-4 w-4" aria-hidden="true" />}
           </Button>
 
           <AnnouncementBell />
 
           {user && (
-            <button onClick={() => setShowProfile(true)} className="flex items-center gap-2 pl-2 border-l hover:bg-muted/30 rounded-lg py-1 pr-2 transition-colors cursor-pointer">
+            <button onClick={() => setShowProfile(true)} className="flex items-center gap-2 pl-3 border-l hover:bg-muted/40 rounded-lg py-1 pr-2 transition-colors cursor-pointer" aria-label="用户信息">
               {user.avatar ? (
                 <img src={user.avatar} alt="" className="h-7 w-7 rounded-full object-cover border" />
               ) : (
@@ -187,17 +190,17 @@ export function AdminLayout() {
             </button>
           )}
 
-          <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-destructive hover:bg-destructive/5 ml-1">
-            <LogOut className="h-4 w-4" />
+          <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-destructive hover:bg-destructive/5 ml-1" aria-label="退出登录">
+            <LogOut className="h-4 w-4" aria-hidden="true" />
           </Button>
         </header>
 
         <ProfileDialog open={showProfile} onOpenChange={setShowProfile} />
-        <main className={`flex-1 flex flex-col bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/[0.03] via-transparent to-transparent ${isChatPage ? 'overflow-hidden p-0' : 'p-6 text-sm'} ${narrow ? 'is-narrow' : ''}`} style={{ overflow: 'hidden auto', maxWidth: '100%' }}>
+        <main id="main-content" className={`flex-1 flex flex-col ${isChatPage ? 'overflow-hidden p-0' : 'p-6'} ${narrow ? 'is-narrow' : ''}`} style={{ overflow: 'hidden auto', maxWidth: '100%' }}>
           <Outlet />
         </main>
-        <footer className="h-8 shrink-0 flex items-center justify-center border-t text-xs text-muted-foreground/60">
-          &copy; {new Date().getFullYear()} Enterprise Knowledge Base. All rights reserved.
+        <footer className="h-7 shrink-0 flex items-center justify-center border-t text-[10px] text-muted-foreground/40 select-none">
+          &copy; {new Date().getFullYear()} Enterprise Knowledge Base
         </footer>
       </SidebarInset>
     </SidebarProvider>

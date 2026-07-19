@@ -94,10 +94,10 @@ export function ModelPage() {
     <div className="list-page animate-fade-in">
       <div className="flex items-center justify-between page-section">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">模型配置</h1>
-          <p className="text-sm text-muted-foreground mt-1">管理 LLM 提供商和模型参数</p>
+          <h1 className="text-2xl font-bold tracking-tight text-balance">模型配置</h1>
+          <p className="text-sm text-muted-foreground/70 mt-0.5">管理 LLM 提供商和模型参数</p>
         </div>
-        <Button onClick={openCreate}><Plus className="mr-1 h-3 w-3" />新建配置</Button>
+        <Button onClick={openCreate}><Plus className="mr-1 h-3 w-3" aria-hidden="true" aria-hidden="true" />新建配置</Button>
       </div>
       <div className="list-card">
         <Card className="admin-table border shadow-sm overflow-hidden">
@@ -123,7 +123,7 @@ export function ModelPage() {
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow><TableCell colSpan={6} className="text-center py-12 text-muted-foreground animate-pulse">加载中...</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={6} className="text-center py-12 text-muted-foreground animate-pulse">加载中…</TableCell></TableRow>
                 ) : configs.length === 0 ? (
                   <TableRow><TableCell colSpan={6} className="text-center py-12 text-muted-foreground">暂无配置，点击"新建配置"添加</TableCell></TableRow>
                 ) : configs.map((c, idx) => (
@@ -153,8 +153,8 @@ export function ModelPage() {
                             <Star className="h-3.5 w-3.5" />
                           </Button>
                         )}
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(c)}><Pencil className="h-3.5 w-3.5" /></Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive/70 hover:text-destructive" onClick={() => setDeleteTarget(c.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(c)}><Pencil className="h-3.5 w-3.5" aria-hidden="true" /></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive/70 hover:text-destructive" onClick={() => setDeleteTarget(c.id)}><Trash2 className="h-3.5 w-3.5" aria-hidden="true" /></Button>
                       </div>
                     </TableCell>
                   </TableRow>

@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Plus, Download } from 'lucide-react'
+import { Plus, Download, FileText, RotateCcw, Search } from 'lucide-react'
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { api } from '@/api/client'
@@ -145,85 +145,101 @@ export function KnowledgePage() {
   return (
     <div className="list-page animate-fade-in">
       <div className="list-header flex items-center justify-between shrink-0">
-        <h1 className="text-2xl font-bold">知识库管理</h1>
-        <Button onClick={() => setUploadOpen(true)}><Plus className="mr-1 h-3 w-3" />上传文档</Button>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-balance">知识库管理</h1>
+          <p className="text-sm text-muted-foreground/70 mt-0.5">管理系统中的文档和知识库</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button onClick={() => setUploadOpen(true)}><Plus className="mr-1 h-3 w-3" aria-hidden="true" aria-hidden="true" />上传文档</Button>
+        </div>
       </div>
       <div className="list-card">
 
-      <Card className="admin-table border shadow-sm">
-        <CardHeader>
-          <div className="flex items-center gap-4">
-            <Input
-              placeholder="搜索文件名..."
-              className="max-w-xs"
-              value={keyword}
-              onChange={e => { setKeyword(e.target.value); setPage(1) }}
-            />
-            <Select value={fileTypeFilter} onValueChange={v => { setFileTypeFilter(v); setPage(1) }}>
-              <SelectTrigger className="w-28">
-                <SelectValue placeholder="全部类型" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">全部类型</SelectItem>
-                <SelectItem value="pdf">PDF</SelectItem><SelectItem value="docx">DOCX</SelectItem>
-                <SelectItem value="xlsx">XLSX</SelectItem><SelectItem value="pptx">PPTX</SelectItem>
-                <SelectItem value="md">Markdown</SelectItem><SelectItem value="txt">TXT</SelectItem>
-                <SelectItem value="csv">CSV</SelectItem><SelectItem value="jpg">JPEG</SelectItem>
-                <SelectItem value="png">PNG</SelectItem><SelectItem value="bmp">BMP</SelectItem>
-                <SelectItem value="msg">MSG</SelectItem><SelectItem value="eml">EML</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={statusFilter} onValueChange={v => { setStatusFilter(v); setPage(1) }}>
-              <SelectTrigger className="w-28">
-                <SelectValue placeholder="全部状态" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">全部状态</SelectItem>
-                <SelectItem value="pending">等待中</SelectItem>
-                <SelectItem value="parsing">解析中</SelectItem>
-                <SelectItem value="chunking">分块中</SelectItem>
-                <SelectItem value="indexing">索引中</SelectItem>
-                <SelectItem value="ready">已完成</SelectItem>
-                <SelectItem value="failed">失败</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardHeader>
-        <CardContent className="p-0 flex-1 flex flex-col min-h-0">
-          <div className="table-scroll">
-          <DocumentTable
-            documents={documents}
-            onPreview={handlePreview}
-            onDelete={(id) => setDeleteTarget(id)}
-            onReindex={handleReindex}
-            onVisibilityChange={handleVisibilityChange}
-          />
-          </div>
-          {total > 0 && (
-            <div className="flex items-center justify-end px-4 py-3 border-t bg-muted/10 gap-2">
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs text-muted-foreground">共 {total} 条</span>
-                <div className="w-px h-4 bg-border mx-1" />
-                <select
-                  value={pageSize}
-                  onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1) }}
-                  className="h-7 text-xs border rounded px-1.5 bg-background text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                >
-                  <option value={10}>10</option>
-                  <option value={20}>20</option>
-                  <option value={50}>50</option>
-                  <option value={100}>100</option>
-                </select>
-                <span className="text-xs text-muted-foreground">条/页</span>
-                <div className="w-px h-4 bg-border mx-1" />
-                <Button variant="outline" size="sm" className="h-7 text-xs" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>上一页</Button>
-                <span className="flex items-center px-2 text-xs text-muted-foreground">{page} / {totalPages}</span>
-                <Button variant="outline" size="sm" className="h-7 text-xs" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>下一页</Button>
+        <Card className="admin-table border shadow-sm">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <FileText className="h-4 w-4 text-primary" />
+                文档列表
+              </CardTitle>
+            </div>
+            <div className="flex items-center gap-2 mt-3 flex-wrap filter-bar">
+              <Input
+                placeholder="搜索文件名…" autoComplete="off"
+                className="h-8 w-48 text-xs"
+                value={keyword}
+                onChange={e => { setKeyword(e.target.value); setPage(1) }}
+              />
+              <Select value={fileTypeFilter} onValueChange={v => { setFileTypeFilter(v); setPage(1) }}>
+                <SelectTrigger size="sm" className="w-28 text-xs">
+                  <SelectValue placeholder="全部类型" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="" className="text-xs">全部类型</SelectItem>
+                  <SelectItem value="pdf" className="text-xs">PDF</SelectItem><SelectItem value="docx" className="text-xs">DOCX</SelectItem>
+                  <SelectItem value="xlsx" className="text-xs">XLSX</SelectItem><SelectItem value="pptx" className="text-xs">PPTX</SelectItem>
+                  <SelectItem value="md" className="text-xs">Markdown</SelectItem><SelectItem value="txt" className="text-xs">TXT</SelectItem>
+                  <SelectItem value="csv" className="text-xs">CSV</SelectItem>
+                  <SelectItem value="msg" className="text-xs">MSG</SelectItem><SelectItem value="eml" className="text-xs">EML</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={statusFilter} onValueChange={v => { setStatusFilter(v); setPage(1) }}>
+                <SelectTrigger size="sm" className="w-28 text-xs">
+                  <SelectValue placeholder="全部状态" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="" className="text-xs">全部状态</SelectItem>
+                  <SelectItem value="pending" className="text-xs">等待中</SelectItem>
+                  <SelectItem value="parsing" className="text-xs">解析中</SelectItem>
+                  <SelectItem value="chunking" className="text-xs">分块中</SelectItem>
+                  <SelectItem value="indexing" className="text-xs">索引中</SelectItem>
+                  <SelectItem value="ready" className="text-xs">已完成</SelectItem>
+                  <SelectItem value="failed" className="text-xs">失败</SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="flex items-center gap-2">
+                <Button variant="default" size="sm" className="h-8 text-xs shadow-sm" onClick={() => setPage(1)}><Search className="h-3 w-3 mr-1" aria-hidden="true" />搜索</Button>
+                <Button variant="default" size="sm" className="h-8 text-xs shadow-sm" onClick={() => { setKeyword(''); setStatusFilter(''); setFileTypeFilter(''); setPage(1) }}>
+                  <RotateCcw className="mr-1 h-3 w-3" />重置
+                </Button>
               </div>
             </div>
-          )}
-        </CardContent>
-      </Card></div>
+          </CardHeader>
+          <CardContent className="p-0 flex-1 flex flex-col min-h-0">
+            <div className="table-scroll">
+              <DocumentTable
+                documents={documents}
+                onPreview={handlePreview}
+                onDelete={(id) => setDeleteTarget(id)}
+                onReindex={handleReindex}
+                onVisibilityChange={handleVisibilityChange}
+              />
+            </div>
+            {total > 0 && (
+              <div className="flex items-center justify-end px-4 py-3 border-t bg-muted/10 gap-2">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs text-muted-foreground">共 {total} 条</span>
+                  <div className="w-px h-4 bg-border mx-1" />
+                  <select
+                    value={pageSize}
+                    onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1) }}
+                    className="h-7 text-xs border rounded px-1.5 bg-background text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                  >
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                  </select>
+                  <span className="text-xs text-muted-foreground">条/页</span>
+                  <div className="w-px h-4 bg-border mx-1" />
+                  <Button variant="outline" size="sm" className="h-7 text-xs" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>上一页</Button>
+                  <span className="flex items-center px-2 text-xs text-muted-foreground">{page} / {totalPages}</span>
+                  <Button variant="outline" size="sm" className="h-7 text-xs" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>下一页</Button>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card></div>
 
       <UploadDialog open={uploadOpen} onOpenChange={setUploadOpen} onSuccess={fetchDocuments} />
 
@@ -231,54 +247,54 @@ export function KnowledgePage() {
         <DialogContent className="sm:max-w-4xl max-h-[85vh]">
           <DialogHeader><DialogTitle className="text-lg">{previewDoc?.file_name}</DialogTitle></DialogHeader>
           {previewLoading ? (
-            <p className="text-muted-foreground animate-pulse text-center py-8">加载中...</p>
+            <p className="text-muted-foreground animate-pulse text-center py-8">加载中…</p>
           ) : (<div className="flex flex-col min-h-0">
             {previewDoc?.file_path && !previewContent.startsWith('__OFFICE_FAIL__:') && !previewContent.startsWith('__DOWNLOAD__:') && !previewContent.startsWith('__HTML__:') && (
-              <div className="bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-200 px-4 py-2 text-xs text-center border-b shrink-0 flex items-center justify-center gap-1">
+              <div className="bg-amber-50/80 dark:bg-amber-950/20 text-amber-700 dark:text-amber-300 px-4 py-2 text-xs text-center border-b shrink-0 flex items-center justify-center gap-1.5">
                 预览效果可能与实际文档有差异，
                 <a href={fileUrl(previewDoc.file_path)} download className="font-semibold underline underline-offset-2">下载</a>
                 查看原文件
               </div>
             )}
             {previewContent.startsWith('__PDF__:') ? (
-            <iframe src={fileUrl(previewContent.slice(8))} className="w-full h-[70vh] border rounded" />
-          ) : previewContent.startsWith('__IMAGE__:') ? (
-            <div className="flex justify-center p-4">
-              <img src={fileUrl(previewContent.slice(11))} alt={previewDoc?.file_name} className="max-w-full max-h-[70vh] object-contain rounded" />
-            </div>
-          ) : previewContent.startsWith('__HTML__:') ? (
-            <iframe srcDoc={previewContent.slice(9)} className="w-full h-[75vh] border rounded bg-white" title="文档预览" />
-          ) : previewContent.startsWith('__OFFICE_FAIL__:') ? (
-            <div className="text-center py-8 space-y-4">
-              <p className="text-muted-foreground">该 Office 文档暂不支持在线预览</p>
-              <Button variant="outline" asChild>
-                <a href={fileUrl(previewContent.slice(16))} download target="_blank" rel="noopener noreferrer">
-                  <Download className="mr-1.5 h-4 w-4" />下载文件
-                </a>
-              </Button>
-            </div>
-          ) : previewContent.startsWith('__DOWNLOAD__:') ? (
-            <div className="text-center py-8 space-y-4">
-              <p className="text-muted-foreground">该格式暂不支持在线预览</p>
-              <Button variant="outline" asChild>
-                <a href={fileUrl(previewContent.slice(13))} download target="_blank" rel="noopener noreferrer">
-                  <Download className="mr-1.5 h-4 w-4" />下载文件
-                </a>
-              </Button>
-            </div>
-          ) : previewContent ? (
-            <ScrollArea className="max-h-[70vh]">
-              <div className="prose prose-sm dark:prose-invert max-w-none p-1 [&_pre]:whitespace-pre-wrap [&_pre]:break-all [&_code]:whitespace-pre-wrap [&_code]:break-all" style={{ overflowWrap: 'break-word' }}>
-                {MARKDOWN_EXTENSIONS.has(getFileExt(previewDoc?.file_name || '')) ? (
-                  <Markdown remarkPlugins={[remarkGfm]}>{previewContent}</Markdown>
-                ) : (
-                  <pre className="text-sm whitespace-pre-wrap break-all font-mono">{previewContent}</pre>
-                )}
+              <iframe src={fileUrl(previewContent.slice(8))} className="w-full h-[70vh] border rounded" />
+            ) : previewContent.startsWith('__IMAGE__:') ? (
+              <div className="flex justify-center p-4">
+                <img src={fileUrl(previewContent.slice(11))} alt={previewDoc?.file_name} className="max-w-full max-h-[70vh] object-contain rounded" />
               </div>
-            </ScrollArea>
-          ) : (
-            <p className="text-muted-foreground text-center py-8">（无内容）</p>
-          )}
+            ) : previewContent.startsWith('__HTML__:') ? (
+              <iframe srcDoc={previewContent.slice(9)} className="w-full h-[75vh] border rounded bg-white" title="文档预览" />
+            ) : previewContent.startsWith('__OFFICE_FAIL__:') ? (
+              <div className="text-center py-8 space-y-4">
+                <p className="text-muted-foreground">该 Office 文档暂不支持在线预览</p>
+                <Button variant="outline" asChild>
+                  <a href={fileUrl(previewContent.slice(16))} download target="_blank" rel="noopener noreferrer">
+                    <Download className="mr-1.5 h-4 w-4" />下载文件
+                  </a>
+                </Button>
+              </div>
+            ) : previewContent.startsWith('__DOWNLOAD__:') ? (
+              <div className="text-center py-8 space-y-4">
+                <p className="text-muted-foreground">该格式暂不支持在线预览</p>
+                <Button variant="outline" asChild>
+                  <a href={fileUrl(previewContent.slice(13))} download target="_blank" rel="noopener noreferrer">
+                    <Download className="mr-1.5 h-4 w-4" />下载文件
+                  </a>
+                </Button>
+              </div>
+            ) : previewContent ? (
+              <ScrollArea className="max-h-[70vh]">
+                <div className="prose prose-sm dark:prose-invert max-w-none p-1 [&_pre]:whitespace-pre-wrap [&_pre]:break-all [&_code]:whitespace-pre-wrap [&_code]:break-all" style={{ overflowWrap: 'break-word' }}>
+                  {MARKDOWN_EXTENSIONS.has(getFileExt(previewDoc?.file_name || '')) ? (
+                    <Markdown remarkPlugins={[remarkGfm]}>{previewContent}</Markdown>
+                  ) : (
+                    <pre className="text-sm whitespace-pre-wrap break-all font-mono">{previewContent}</pre>
+                  )}
+                </div>
+              </ScrollArea>
+            ) : (
+              <p className="text-muted-foreground text-center py-8">（无内容）</p>
+            )}
           </div>)}
         </DialogContent>
       </Dialog>

@@ -36,9 +36,12 @@ export function ConfirmDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
+      {/* @ts-ignore - role alertdialog for accessibility */}
+      
       <DialogContent
-        className="sm:max-w-sm p-0 gap-0 overflow-hidden shadow-xl"
+        className="sm:max-w-sm p-0 gap-0 overflow-hidden shadow-2xl"
         showCloseButton={false}
+        style={{ border: "1px solid var(--border)" }}
       >
         {/* Header: icon + title */}
         <div
@@ -55,7 +58,7 @@ export function ConfirmDialog({
                 : 'bg-amber-500/10 text-amber-600'
             }`}
           >
-            <Icon className="h-4 w-4" />
+            <Icon className="h-4 w-4" aria-hidden="true" />
           </div>
           <h2 className="text-sm font-semibold">{title}</h2>
         </div>

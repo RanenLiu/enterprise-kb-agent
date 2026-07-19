@@ -64,7 +64,7 @@ async def process_document(msg: aio_pika.IncomingMessage) -> None:
     async with semaphore:
         body = json.loads(msg.body.decode())
         doc_id = body["doc_id"]
-        dept_id = body["dept_id"]
+        dept_id = body["dept_id"] or None
         logger.info("Processing document %s (dept=%s)", doc_id, dept_id)
 
         async with async_session_factory() as session:
@@ -159,7 +159,7 @@ async def process_document(msg: aio_pika.IncomingMessage) -> None:
                     ]
                     embeddings = await asyncio.to_thread(embed_texts, texts_to_embed)
                     milvus_ids = index_to_milvus(
-                        doc_id, dept_id, doc.visibility, chunks, embeddings,
+                        doc_id, dept_id or "", doc.visibility, chunks, embeddings,
                         str(doc.project_id) if doc.project_id else "",
                     )
                 except Exception as e:

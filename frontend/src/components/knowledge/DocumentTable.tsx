@@ -53,8 +53,7 @@ export function DocumentTable({ documents, onPreview, onDelete, onReindex, onVis
   return (
     <Table>
       <TableHeader>
-        <TableRow>
-          <TableHead className="w-[15%] min-w-[120px]">文件名</TableHead>
+          <TableRow className="bg-muted/20"><TableHead className="w-[15%] min-w-[120px]">文件名</TableHead>
           <TableHead className="w-[5%] hidden md:table-cell">类型</TableHead>
           <TableHead className="w-[5%] hidden md:table-cell">大小</TableHead>
           <TableHead className="w-[5%]">状态</TableHead>
@@ -65,11 +64,11 @@ export function DocumentTable({ documents, onPreview, onDelete, onReindex, onVis
         </TableRow>
       </TableHeader>
       <TableBody>
-        {documents.map(doc => {
+        {documents.map((doc, idx) => {
           const canChange = canChangeVisibility(doc)
           const isAdminDoc = doc.visibility === 'public' && !isAdmin
           return (
-          <TableRow key={doc.id} className={isAdminDoc ? 'bg-muted/30' : doc.visibility === 'private' ? 'opacity-60' : ''}>
+          <TableRow key={doc.id} className={`${idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'} ${isAdminDoc ? 'bg-muted/30' : doc.visibility === 'private' ? 'opacity-60' : ''}`}>
             <TableCell>
               <button className="font-medium text-left hover:text-primary hover:underline cursor-pointer transition-colors bg-transparent border-none p-0" onClick={() => onPreview?.(doc)} title="预览">
                 {doc.file_name}
@@ -82,7 +81,7 @@ export function DocumentTable({ documents, onPreview, onDelete, onReindex, onVis
               {doc.status === 'ready' ? (
                 canChange ? (
                   <Select value={doc.visibility} onValueChange={(v) => onVisibilityChange(doc.id, v)}>
-                    <SelectTrigger className={`h-7 w-28 text-xs border ${VIS_CLASSES[doc.visibility] || ''}`}>
+                    <SelectTrigger className={`h-7 w-28 text-xs border ${VIS_CLASSES[doc.visibility] || ''} rounded-md`}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -104,24 +103,24 @@ export function DocumentTable({ documents, onPreview, onDelete, onReindex, onVis
             <TableCell className="hidden md:table-cell">{formatDate(doc.created_at)}</TableCell>
             <TableCell className="space-x-1 whitespace-nowrap">
               {doc.status === 'ready' && doc.file_path && (
-                <Button variant="outline" size="icon" className="h-8 w-8" asChild title="下载">
+                <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg" asChild title="下载">
                   <a href={'/api/v1/admin/files/' + doc.file_path.split('/').map(encodeURIComponent).join('/')} download target="_blank" rel="noopener noreferrer">
                     <Download className="h-3.5 w-3.5" />
                   </a>
                 </Button>
               )}
               {(isAdmin || doc.uploaded_by === user?.id) && (
-                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => onReindex(doc.id)} disabled={['parsing', 'chunking', 'indexing'].includes(doc.status)} title="重索引">
+                <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg" onClick={() => onReindex(doc.id)} disabled={['parsing', 'chunking', 'indexing'].includes(doc.status)} title="重索引">
                   <RotateCw className="h-3.5 w-3.5" />
                 </Button>
               )}
               {onGraph && (
-                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => onGraph(doc.id)} title="图谱">
+                <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg" onClick={() => onGraph(doc.id)} title="图谱">
                   <Share2 className="h-3.5 w-3.5" />
                 </Button>
               )}
               {(isAdmin || doc.uploaded_by === user?.id) && (
-                <Button variant="destructive" size="icon" className="h-8 w-8" onClick={() => onDelete(doc.id)} title="删除">
+                <Button variant="destructive" size="icon" className="h-8 w-8 rounded-lg" onClick={() => onDelete(doc.id)} title="删除">
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
               )}

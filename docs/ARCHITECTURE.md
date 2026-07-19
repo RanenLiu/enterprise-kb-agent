@@ -67,7 +67,6 @@ This document describes the architecture of the **Open Source Edition**.
 | **Gateway** | Request routing, authentication, authorization, rate limiting, CORS |
 | **RAG Pipeline** | Multi-channel retrieval, hybrid search, BM25 rescore, reranking, LangGraph orchestration |
 | **Storage** | Persistent data, vector indices, cache, file storage |
-| **Storage** | Persistent data, vector indices, cache, file storage |
 
 ### Data Flow: Query
 

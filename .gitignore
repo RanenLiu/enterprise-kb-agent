@@ -15,6 +15,7 @@ package-lock.json
 # Build
 dist/
 logs/
+build/
 
 # Docker data (bind mounts, not in repo)
 data/

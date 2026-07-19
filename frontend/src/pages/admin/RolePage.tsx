@@ -101,10 +101,10 @@ export function RolePage() {
     <div className="list-page animate-fade-in">
       <div className="list-header flex items-center justify-between shrink-0">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">角色管理</h1>
-          <p className="text-sm text-muted-foreground mt-1">定义角色及其权限范围</p>
+          <h1 className="text-2xl font-bold tracking-tight text-balance">角色管理</h1>
+          <p className="text-sm text-muted-foreground/70 mt-0.5">定义角色及其权限范围</p>
         </div>
-        <Button onClick={openCreate}><Plus className="mr-1 h-3 w-3" />新建角色</Button>
+        <Button onClick={openCreate}><Plus className="mr-1 h-3 w-3" aria-hidden="true" aria-hidden="true" />新建角色</Button>
       </div>
       <div className="list-card">
         <Card className="admin-table border shadow-sm overflow-hidden">
@@ -130,7 +130,7 @@ export function RolePage() {
                 </TableHeader>
                 <TableBody>
                   {loading ? (
-                    <TableRow><TableCell colSpan={6} className="text-center py-12 text-muted-foreground animate-pulse">加载中...</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center py-12 text-muted-foreground animate-pulse">加载中…</TableCell></TableRow>
                   ) : roles.length === 0 ? (
                     <TableRow><TableCell colSpan={6} className="text-center py-12 text-muted-foreground">暂无角色数据</TableCell></TableRow>
                   ) : roles.slice((rolePage - 1) * rolePageSize, rolePage * rolePageSize).map((r, idx) => (
@@ -142,8 +142,8 @@ export function RolePage() {
                       <TableCell className="hidden sm:table-cell text-sm">{r.sort_order}</TableCell>
                       <TableCell>
                         <div className="flex gap-0.5">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(r)}><Pencil className="h-3.5 w-3.5" /></Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive/70 hover:text-destructive" onClick={() => setDeleteTarget(r.id)} disabled={r.is_system}><Trash2 className="h-3.5 w-3.5" /></Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(r)}><Pencil className="h-3.5 w-3.5" aria-hidden="true" /></Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive/70 hover:text-destructive" onClick={() => setDeleteTarget(r.id)} disabled={r.is_system}><Trash2 className="h-3.5 w-3.5" aria-hidden="true" /></Button>
                         </div>
                       </TableCell>
                     </TableRow>

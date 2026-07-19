@@ -171,10 +171,13 @@ cd server
 python3 -m venv .venv && source .venv/bin/activate
 cp .env.example .env  # 已配好 localhost，无需修改
 pip install -r requirements.txt
-pip install -e packages/kb-core -e packages/kb-biz -e packages/kb-adapter-postgres
+pip install -e packages/kb-core -e packages/kb-biz -e packages/kb-adapter-postgres -e packages/kb-adapter-rabbitmq
 python -m scripts.create_tables  # 首次创建表
 python -m scripts.seed_os  # 初始化数据库
 uvicorn backend.main:app --reload
+
+# Worker（文档处理，另开终端）
+python backend/worker.py
 
 # 前端
 cd frontend && pnpm install && pnpm dev

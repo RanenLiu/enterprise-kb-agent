@@ -5,22 +5,22 @@ import { Slot } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 
-const PRESS = "scale(1.03)"
+const PRESS_SCALE = "scale(0.97)"
 
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex shrink-0 items-center justify-center gap-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        default: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/85 active:bg-primary/95",
         destructive:
-          "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40",
+          "bg-destructive text-white shadow-sm hover:bg-destructive/85 dark:bg-destructive/60",
         outline:
-          "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
+          "border border-border bg-background hover:bg-muted/60 hover:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-sm",
         ghost:
-          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
+          "hover:bg-muted/50 hover:text-foreground",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
@@ -52,13 +52,29 @@ function Button({
     asChild?: boolean
   }) {
   const Comp = asChild ? Slot.Root : "button"
+  const pressRef = React.useRef<HTMLElement | null>(null)
 
-  const press = useCallback((el: HTMLElement | null) => {
-    if (el) el.style.transform = PRESS
-  }, [])
-  const release = useCallback((el: HTMLElement | null) => {
-    if (el) el.style.transform = ""
-  }, [])
+  const handlePointerDown = useCallback((e: React.PointerEvent<HTMLButtonElement>) => {
+    const el = e.currentTarget
+    pressRef.current = el
+    el.style.transform = PRESS_SCALE
+    ;(props as any).onPointerDown?.(e)
+  }, [props])
+
+  const handlePointerUp = useCallback((e: React.PointerEvent<HTMLButtonElement>) => {
+    const el = e.currentTarget
+    el.style.transform = ""
+    pressRef.current = null
+    ;(props as any).onPointerUp?.(e)
+  }, [props])
+
+  const handlePointerLeave = useCallback((e: React.PointerEvent<HTMLButtonElement>) => {
+    if (pressRef.current) {
+      pressRef.current.style.transform = ""
+      pressRef.current = null
+    }
+    ;(props as any).onPointerLeave?.(e)
+  }, [props])
 
   return (
     <Comp
@@ -67,9 +83,9 @@ function Button({
       data-size={size}
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
-      onPointerDown={(e) => { press(e.currentTarget as HTMLElement); (props as any).onPointerDown?.(e) }}
-      onPointerUp={(e) => { release(e.currentTarget as HTMLElement); (props as any).onPointerUp?.(e) }}
-      onPointerLeave={(e) => { release(e.currentTarget as HTMLElement); (props as any).onPointerLeave?.(e) }}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerLeave={handlePointerLeave}
     />
   )
 }

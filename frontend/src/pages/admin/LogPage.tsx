@@ -143,8 +143,8 @@ export function LogPage() {
     <div className="list-page animate-fade-in">
       <div className="list-header shrink-0">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">操作日志</h1>
-          <p className="text-sm text-muted-foreground mt-1">查看系统操作和登录记录</p>
+          <h1 className="text-2xl font-bold tracking-tight text-balance">操作日志</h1>
+          <p className="text-sm text-muted-foreground/70 mt-0.5">查看系统操作和登录记录</p>
         </div>
       </div>
       <div className="list-card">
@@ -275,7 +275,7 @@ export function LogPage() {
                 </Select>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="default" size="sm" className="h-8 text-xs shadow-sm" onClick={doSearch}><Search className="h-3 w-3 mr-1" />搜索</Button>
+                <Button variant="default" size="sm" className="h-8 text-xs shadow-sm" onClick={doSearch}><Search className="h-3 w-3 mr-1" aria-hidden="true" />搜索</Button>
                 <Button variant="default" size="sm" className="h-8 text-xs shadow-sm" onClick={() => { setFilters({ action_type: '_all', resource_type: '_all', result: '_all', keyword: '', user: '', operator: '', dept_id: '_all', tenant_id: '_all', start_time: '', end_time: '' }); doSearch() }}>
                   <RotateCcw className="mr-1 h-3 w-3" />重置
                 </Button>
@@ -313,7 +313,7 @@ export function LogPage() {
                 </TableHeader>
                 <TableBody>
                   {loading ? (
-                    <TableRow><TableCell colSpan={8} className="text-center py-12 text-muted-foreground animate-pulse">加载中...</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={8} className="text-center py-12 text-muted-foreground animate-pulse">加载中…</TableCell></TableRow>
                   ) : logs.length === 0 ? (
                     <TableRow><TableCell colSpan={8} className="text-center py-12 text-muted-foreground">暂无日志记录</TableCell></TableRow>
                   ) : logs.map((l: any, idx: number) => (

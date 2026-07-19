@@ -16,6 +16,7 @@ import {
   Home, MessageSquare, Database, Settings, LayoutDashboard, Building2, Building,
   Shield, Users, Menu, FileText, Activity, Cpu, ChevronRight, FolderKanban, type LucideIcon,
 } from 'lucide-react'
+import { useTheme } from '@/hooks/useTheme'
 import { useAuth } from '@/hooks/useAuth'
 import { api } from '@/api/client'
 
@@ -46,6 +47,7 @@ export function AppSidebar() {
   const location = useLocation()
   const navigate = useNavigate()
   const { user, menus } = useAuth()
+  const { glass } = useTheme()
   const isSuperAdmin = user?.roles?.includes('super_admin')
   const visibleMenus = isSuperAdmin
     ? menus.filter((m) => !m.path?.startsWith('/admin/projects') && !m.children?.some((c: any) => c.path?.startsWith('/admin/projects')))
@@ -186,12 +188,12 @@ const renderMenuItem = (node: MenuNode) => {
             </SidebarMenuSub>
           )}
           {state === "collapsed" && flyoutMenu === node.id && (
-            <div ref={flyoutRef} className="fixed z-50 rounded-lg border bg-popover py-2 shadow-xl" style={{ left: '4px', top: flyoutTop + 'px', width: '60px' }}>
+            <div ref={flyoutRef} className="fixed z-50 rounded-xl border-0 bg-popover py-2 shadow-2xl ring-1 ring-border/40" style={{ left: '4px', top: flyoutTop + 'px', width: '60px' }}>
               {node.children.map((child) => {
                 const CIC = loadIcon(child.icon)
                 const active = isActive(child.path)
                 return (
-                  <div key={child.id} onClick={() => { if (child.path) { navigate(child.path); setFlyoutMenu(null) } }} className={`flyout-item relative flex items-center justify-center py-2 mx-1 rounded-md cursor-pointer transition-colors ${active ? 'bg-primary/10 text-primary' : 'hover:bg-muted'}`}>
+                  <div key={child.id} onClick={() => { if (child.path) { navigate(child.path); setFlyoutMenu(null) } }} className={`flyout-item relative flex items-center justify-center py-2 mx-1 rounded-lg cursor-pointer transition-all duration-150 ${active ? 'bg-primary/8 text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
                     <CIC className="h-4 w-4 shrink-0" />
                     <div className="flyout-tip absolute left-full ml-2 px-2 py-1 rounded bg-popover border text-xs whitespace-nowrap opacity-0 transition-opacity pointer-events-none shadow-sm">
                       {child.name}
@@ -209,17 +211,17 @@ const renderMenuItem = (node: MenuNode) => {
   }
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" className={glass ? 'glass-sidebar glass-edge-side' : ''}>
       <SidebarHeader>
         <div className="flex items-center gap-2.5 px-2 py-4">
           {tenantInfo.logo ? (
             <img src={tenantInfo.logo} alt="" className="h-9 w-9 rounded-xl object-cover border cursor-pointer" onClick={() => { navigate('/'); if (isMobile) setOpenMobile(false) }} />
           ) : (
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground text-sm font-bold shadow-sm shrink-0 cursor-pointer" onClick={() => { navigate('/'); if (isMobile) setOpenMobile(false) }}>
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground text-sm font-bold shadow-sm shrink-0 cursor-pointer transition-transform hover:scale-105" onClick={() => { navigate('/'); if (isMobile) setOpenMobile(false) }}>
               {tenantInfo.name.charAt(0)}
             </div>
           )}
-          <span className="text-sm font-semibold tracking-tight truncate">{tenantInfo.name}</span>
+          <span className="text-sm font-semibold tracking-tight truncate text-foreground/80">{tenantInfo.name}</span>
         </div>
       </SidebarHeader>
       <SidebarContent>

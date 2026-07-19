@@ -103,14 +103,14 @@ export function DepartmentPage() {
       <div className="list-page animate-fade-in">
         <div className="page-section">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-balance">{title}</h1>
             <p className="text-sm text-muted-foreground mt-1">管理您所在部门的信息</p>
           </div>
         </div>
 
         <div className="page-section">
           <Card className="admin-table border shadow-sm">
-            <CardHeader className="border-b bg-muted/30 pb-3">
+            <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <Building2 className="h-4 w-4 text-primary" />
                 部门信息
@@ -118,7 +118,7 @@ export function DepartmentPage() {
             </CardHeader>
             <CardContent className="p-6">
               {loading ? (
-                <p className="text-center py-8 text-muted-foreground animate-pulse">加载中...</p>
+                <p className="text-center py-8 text-muted-foreground animate-pulse">加载中…</p>
               ) : !myDept ? (
                 <p className="text-center py-8 text-muted-foreground">未找到部门信息</p>
               ) : (
@@ -184,10 +184,10 @@ export function DepartmentPage() {
     <div className="list-page animate-fade-in">
       <div className="list-header flex items-center justify-between shrink-0">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-          <p className="text-sm text-muted-foreground mt-1">管理系统中的部门组织架构</p>
+          <h1 className="text-2xl font-bold tracking-tight text-balance">{title}</h1>
+          <p className="text-sm text-muted-foreground/70 mt-0.5">管理系统中的部门组织架构</p>
         </div>
-        <Button onClick={openCreate}><Plus className="mr-1 h-3 w-3" />新建部门</Button>
+        <Button onClick={openCreate}><Plus className="mr-1 h-3 w-3" aria-hidden="true" aria-hidden="true" />新建部门</Button>
       </div>
       <div className="list-card">
         <Card className="admin-table border shadow-sm">
@@ -213,7 +213,7 @@ export function DepartmentPage() {
                 </TableHeader>
                 <TableBody>
                   {loading ? (
-                    <TableRow><TableCell colSpan={6} className="text-center py-12 text-muted-foreground animate-pulse">加载中...</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center py-12 text-muted-foreground animate-pulse">加载中…</TableCell></TableRow>
                   ) : departments.length === 0 ? (
                     <TableRow><TableCell colSpan={6} className="text-center py-12 text-muted-foreground">暂无数据</TableCell></TableRow>
                   ) : departments.slice((deptPage - 1) * deptPageSize, deptPage * deptPageSize).map((d, idx) => (
@@ -236,8 +236,8 @@ export function DepartmentPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-0.5">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(d)}><Pencil className="h-3.5 w-3.5" /></Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive/70 hover:text-destructive" onClick={() => setDeleteTarget(d.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(d)}><Pencil className="h-3.5 w-3.5" aria-hidden="true" /></Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive/70 hover:text-destructive" onClick={() => setDeleteTarget(d.id)}><Trash2 className="h-3.5 w-3.5" aria-hidden="true" /></Button>
                         </div>
                       </TableCell>
                     </TableRow>

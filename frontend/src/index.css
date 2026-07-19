@@ -1,77 +1,81 @@
+/* ── Enterprise KB — Refined Design System ── */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+@layer base { html { font-family: 'Inter', system-ui, sans-serif; } }
+
 @import "tailwindcss";
 
 @custom-variant dark (&:is(.dark *));
 
-:root, :root[data-accent="blue"] {
-  --accent-hue: 265;
-}
-:root[data-accent="violet"] { --accent-hue: 285; }
-:root[data-accent="emerald"] { --accent-hue: 165; }
-:root[data-accent="amber"] { --accent-hue: 85; }
-:root[data-accent="rose"] { --accent-hue: 10; }
+:root, :root[data-accent="blue"] { --accent-hue: 222; }
+:root[data-accent="violet"] { --accent-hue: 270; }
+:root[data-accent="emerald"] { --accent-hue: 158; }
+:root[data-accent="amber"] { --accent-hue: 40; }
+:root[data-accent="rose"] { --accent-hue: 348; }
 
 :root {
-  --background: oklch(0.985 0 0);
-  --foreground: oklch(0.13 0.04 var(--accent-hue));
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.13 0.04 var(--accent-hue));
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.13 0.04 var(--accent-hue));
-  --primary: oklch(0.53 0.18 var(--accent-hue));
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.96 0.01 var(--accent-hue));
-  --secondary-foreground: oklch(0.28 0.06 var(--accent-hue));
-  --muted: oklch(0.96 0.01 var(--accent-hue));
-  --muted-foreground: oklch(0.55 0.02 var(--accent-hue));
-  --accent: oklch(0.6 0.15 calc(var(--accent-hue) + 5));
-  --accent-foreground: oklch(0.985 0 0);
+  --background: oklch(0.97 0.005 var(--accent-hue));
+  --foreground: oklch(0.125 0.035 var(--accent-hue));
+  --card: oklch(0.995 0 0);
+  --card-foreground: oklch(0.125 0.035 var(--accent-hue));
+  --popover: oklch(0.995 0 0);
+  --popover-foreground: oklch(0.125 0.035 var(--accent-hue));
+  --primary: oklch(0.47 0.12 var(--accent-hue));
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.955 0.01 var(--accent-hue));
+  --secondary-foreground: oklch(0.25 0.05 var(--accent-hue));
+  --muted: oklch(0.955 0.008 var(--accent-hue));
+  --muted-foreground: oklch(0.52 0.02 var(--accent-hue));
+  --accent: oklch(0.5 0.1 calc(var(--accent-hue) + 8));
+  --accent-foreground: oklch(0.98 0 0);
   --destructive: oklch(0.55 0.24 30);
   --destructive-foreground: oklch(0.985 0 0);
   --success: oklch(0.55 0.18 150);
   --success-foreground: oklch(0.985 0 0);
   --warning: oklch(0.7 0.18 85);
   --warning-foreground: oklch(0.15 0.02 260);
-  --border: oklch(0.92 0.005 var(--accent-hue));
-  --input: oklch(0.92 0.005 var(--accent-hue));
-  --ring: oklch(0.45 0.18 var(--accent-hue));
+  --border: oklch(0.9 0.008 var(--accent-hue));
+  --input: oklch(0.9 0.008 var(--accent-hue));
+  --ring: oklch(0.42 0.1 var(--accent-hue));
   --radius: 0.5rem;
-  --sidebar-background: oklch(1 0 0);
-  --sidebar-foreground: oklch(0.55 0.02 var(--accent-hue));
+  --sidebar-background: oklch(0.93 0.01 var(--accent-hue));
+  --sidebar-foreground: oklch(0.42 0.025 var(--accent-hue));
   --sidebar-primary: oklch(0.45 0.18 var(--accent-hue));
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.96 0.01 var(--accent-hue));
   --sidebar-accent-foreground: oklch(0.28 0.06 var(--accent-hue));
-  --sidebar-border: oklch(0.92 0.005 var(--accent-hue));
+  --sidebar-border: oklch(0.9 0.008 var(--accent-hue));
   --sidebar-ring: oklch(0.45 0.18 var(--accent-hue));
   --sidebar-width: 14rem;
   --sidebar-width-icon: 3.5rem;
 }
 
 .dark {
-  --background: oklch(0.11 0.03 var(--accent-hue));
-  --foreground: oklch(0.96 0.01 var(--accent-hue));
+  --background: oklch(0.1 0.025 var(--accent-hue));
+  --foreground: oklch(0.955 0.01 var(--accent-hue));
   --card: oklch(0.14 0.04 var(--accent-hue));
   --card-foreground: oklch(0.96 0.01 var(--accent-hue));
   --popover: oklch(0.14 0.04 var(--accent-hue));
   --popover-foreground: oklch(0.96 0.01 var(--accent-hue));
-  --primary: oklch(0.6 0.18 var(--accent-hue));
+  --primary: oklch(0.55 0.14 var(--accent-hue));
   --primary-foreground: oklch(0.11 0.03 var(--accent-hue));
   --secondary: oklch(0.22 0.04 var(--accent-hue));
   --secondary-foreground: oklch(0.96 0.01 var(--accent-hue));
-  --muted: oklch(0.22 0.04 var(--accent-hue));
-  --muted-foreground: oklch(0.65 0.02 var(--accent-hue));
-  --accent: oklch(0.55 0.18 calc(var(--accent-hue) + 5));
-  --accent-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.18 0.03 var(--accent-hue));
+  --muted-foreground: oklch(0.62 0.02 var(--accent-hue));
+  --accent: oklch(0.52 0.15 calc(var(--accent-hue) + 8));
+  --accent-foreground: oklch(0.98 0 0);
   --destructive: oklch(0.55 0.24 30);
   --destructive-foreground: oklch(0.985 0 0);
   --success: oklch(0.5 0.18 150);
   --success-foreground: oklch(0.985 0 0);
   --warning: oklch(0.65 0.18 85);
   --warning-foreground: oklch(0.15 0.02 260);
-  --border: oklch(0.22 0.04 var(--accent-hue));
-  --input: oklch(0.22 0.04 var(--accent-hue));
+  --border: oklch(0.3 0.04 var(--accent-hue));
+  --input: oklch(0.28 0.04 var(--accent-hue));
   --ring: oklch(0.6 0.18 var(--accent-hue));
-  --sidebar-background: oklch(0.09 0.03 var(--accent-hue));
+  --sidebar-background: oklch(0.115 0.03 var(--accent-hue));
   --sidebar-foreground: oklch(0.65 0.02 var(--accent-hue));
   --sidebar-primary: oklch(0.6 0.18 var(--accent-hue));
   --sidebar-primary-foreground: oklch(0.11 0.03 var(--accent-hue));
@@ -116,7 +120,7 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --animate-fade-in: fade-in 0.4s ease-out;
   --animate-slide-up: slide-up 0.4s ease-out;
-  --animate-scale-in: scale-in 0.2s ease-out;
+  --animate-scale-in: scale-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   --sidebar-width: var(--sidebar-width);
   --sidebar-width-icon: var(--sidebar-width-icon);
 }
@@ -127,12 +131,17 @@
 }
 
 @keyframes slide-up {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(14px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
 @keyframes scale-in {
-  from { opacity: 0; transform: scale(0.95); }
+  from { opacity: 0; transform: scale(0.92); }
   to { opacity: 1; transform: scale(1); }
 }
 
@@ -150,20 +159,45 @@
   * { @apply border-border; }
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "salt", "zero", "ss01", "ss02";
+    font-variation-settings: "opsz" 14;
+    font-size: 0.875rem;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    text-wrap: pretty;
   }
   /* Scrollbar */
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--muted-foreground); }
   /* Smooth transitions for theme switching */
-  *, *::before, *::after { transition: background-color .15s ease, border-color .15s ease, color .15s ease, transform .1s ease; }
+  *, *::before, *::after { transition: background-color .15s ease, border-color .15s ease, color .15s ease, transform .1s ease, box-shadow .2s ease, opacity .2s ease; }
   tr { @apply transition-colors duration-150; }
-  /* Click feedback on buttons */
+  h1, h2, h3, h4 { text-wrap: balance; }
+  /* ── Sidebar background — ensure visible depth ── */
+/* The sidebar content div uses bg-sidebar, but make sure it's applied */
+[data-slot="sidebar"] {
+  background-color: var(--sidebar-background);
+}
+[data-slot="sidebar"] > [data-slot="sidebar-gap"] {
+  background: transparent !important;
+}
+
+/* ── Respect reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Click feedback on buttons */
   [data-slot="button"]:not(:disabled):active {
-    outline: 2px solid red !important;
-    transform: scale(1.03) !important;
+    transform: scale(0.97) !important;
+    outline: none !important;
   }
   /* Sidebar menu item click feedback (button-based) */
   [data-slot="sidebar-menu-button"]:active,
@@ -173,32 +207,18 @@
   /* Prevent sidebar horizontal scroll */
   [data-sidebar="sidebar"], [data-slot="sidebar-inner"], [data-slot="sidebar-content"],
   [data-slot="sidebar-header"], [data-slot="sidebar-wrapper"] { overflow-x: hidden !important; }
-  [data-slot="button"]:not(:disabled):active {
-    outline: 2px solid red !important;
-  }
   .card-hover { @apply transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5; }
   .page-section { @apply animate-slide-up; }
   .page-section:nth-child(2) { animation-delay: 0.05s; }
   .page-section:nth-child(3) { animation-delay: 0.1s; }
   .page-section:nth-child(4) { animation-delay: 0.15s; }
-  /* Glass effect */
-  .glass { @apply bg-background/80 backdrop-blur-xl border; }
-  .dark .glass { @apply bg-background/60 backdrop-blur-xl; }
-  /* Noise texture overlay */
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 9999;
-    opacity: 0.015;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    background-repeat: repeat;
-    background-size: 256px 256px;
+  /* Glass effect — base */
+  .glass { @apply bg-background/70 backdrop-blur-xl border border-white/10 dark:border-white/5; }
+  .dark .glass { @apply bg-background/50 backdrop-blur-2xl; }
   }
-}
 
 /* ── Table enhancements ── */
+.admin-table table { font-variant-numeric: tabular-nums; }
 .admin-table { @apply flex flex-col min-h-0 pb-0 gap-0; }
 .admin-table .table-scroll {
   overflow: auto;
@@ -252,16 +272,20 @@ html.filled-icons [data-slot="sidebar-menu-sub-button"][data-active="true"] svg 
 .list-page .list-card { @apply flex-1 flex flex-col min-h-0; }
 
 .admin-table .table-scroll::-webkit-scrollbar { width: 5px; }
-.admin-table .table-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.admin-table .table-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
 .admin-table table { border-collapse: separate; border-spacing: 0; table-layout: fixed; width: 100%; min-width: 100%; box-sizing: border-box; }
 .admin-table table * { box-sizing: border-box; }
 .admin-table th {
   padding: 10px 16px !important;
   font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--muted-foreground);
+  font-weight: 500;
+  color: color-mix(in srgb, var(--muted-foreground) 80%, transparent);
   background: color-mix(in srgb, var(--muted) 50%, transparent);
   border-bottom: 1px solid var(--border);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  padding: 8px 16px !important;
 }
 .admin-table td {
   padding: 12px 16px !important;
@@ -303,5 +327,169 @@ html.filled-icons [data-slot="sidebar-menu-sub-button"][data-active="true"] svg 
 
 /* ── Card header refinements ── */
 .card-header-compact { @apply px-4 py-3; }
-.card-header-compact .card-title-row { @apply flex items-center justify-between; }
+.card-header-compact .card-title-row { @apply flex items-center justify-between; 
+
+/* ── Prevent overscroll on modals/sheets ── */
+[data-state="open"][role="dialog"], [data-slot="sheet-content"] { overscroll-behavior: contain; }
+
+/* ── Glass mode — Apple-style glass-morphism v2 ── */
+
+/* Background depth layer — gives glass something to blur */
+html.glass-mode body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.6;
+  transition: opacity 0.5s ease;
+  background:
+    radial-gradient(ellipse at 18% 22%, color-mix(in srgb, var(--primary) 12%, transparent) 0%, transparent 52%),
+    radial-gradient(ellipse at 82% 78%, color-mix(in srgb, var(--primary) 8%, transparent) 0%, transparent 52%),
+    radial-gradient(ellipse at 50% 50%, color-mix(in srgb, var(--primary) 5%, transparent) 0%, transparent 45%);
+}
+
+.dark html.glass-mode body::before {
+  opacity: 0.8;
+  background:
+    radial-gradient(ellipse at 18% 22%, color-mix(in srgb, var(--primary) 18%, transparent) 0%, transparent 52%),
+    radial-gradient(ellipse at 82% 78%, color-mix(in srgb, var(--primary) 12%, transparent) 0%, transparent 52%),
+    radial-gradient(ellipse at 50% 50%, color-mix(in srgb, var(--primary) 8%, transparent) 0%, transparent 45%);
+}
+
+/* Shared glass edge lighting — Apple signature:
+   Top edge: bright catch light (light from above)
+   Bottom edge: subtle glow
+   Left/Right: none */
+.glass-edge-light {
+  box-shadow:
+    /* Top catch light — the key Apple glass signature */
+    inset 0 1px 0 rgba(255,255,255,0.15),
+    /* Bottom subtle reflection */
+    inset 0 -0.5px 0 rgba(255,255,255,0.05),
+    /* Outer depth */
+    0 1px 2px rgba(0,0,0,0.03),
+    0 8px 24px rgba(0,0,0,0.05) !important;
+}
+
+.dark .glass-edge-light {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    inset 0 -0.5px 0 rgba(255,255,255,0.03),
+    0 1px 2px rgba(0,0,0,0.06),
+    0 8px 24px rgba(0,0,0,0.12) !important;
+}
+
+/* Sidebar edge light — right side gets subtle edge */
+.glass-edge-side {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    inset 0 -0.5px 0 rgba(255,255,255,0.04),
+    /* Right edge hint */
+    inset -1px 0 0 color-mix(in srgb, var(--sidebar-border) 20%, transparent),
+    0 1px 2px rgba(0,0,0,0.03),
+    0 8px 24px rgba(0,0,0,0.05) !important;
+}
+
+.dark .glass-edge-side {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    inset 0 -0.5px 0 rgba(255,255,255,0.02),
+    inset -1px 0 0 color-mix(in srgb, var(--sidebar-border) 15%, transparent),
+    0 1px 2px rgba(0,0,0,0.06),
+    0 8px 24px rgba(0,0,0,0.12) !important;
+}
+
+/* Core glass panel */
+html.glass-mode .glass-card {
+  background: color-mix(in srgb, var(--card) 88%, transparent) !important;
+  backdrop-filter: blur(24px) saturate(1.4) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.4) !important;
+  border: 1px solid color-mix(in srgb, var(--border) 50%, transparent) !important;
+}
+
+/* Sidebar glass */
+html.glass-mode .glass-sidebar {
+  background: color-mix(in srgb, var(--sidebar-background) 85%, transparent) !important;
+  backdrop-filter: blur(24px) saturate(1.4) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.4) !important;
+  border-right: 1px solid color-mix(in srgb, var(--sidebar-border) 30%, transparent) !important;
+}
+
+/* Header glass */
+html.glass-mode .glass-header {
+  background: color-mix(in srgb, var(--background) 72%, transparent) !important;
+  backdrop-filter: blur(30px) saturate(1.5) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(1.5) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 25%, transparent) !important;
+}
+
+/* Chat sidebar panel glass */
+html.glass-mode .glass-panel {
+  background: color-mix(in srgb, var(--card) 88%, transparent) !important;
+  backdrop-filter: blur(22px) saturate(1.3) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.3) !important;
+  border: 1px solid color-mix(in srgb, var(--border) 45%, transparent) !important;
+}
+
+/* ── Dark mode glass ── */
+.dark html.glass-mode .glass-card {
+  background: color-mix(in srgb, var(--card) 80%, transparent) !important;
+  border-color: color-mix(in srgb, var(--border) 35%, transparent) !important;
+}
+
+.dark html.glass-mode .glass-sidebar {
+  background: color-mix(in srgb, var(--sidebar-background) 78%, transparent) !important;
+  border-right-color: color-mix(in srgb, var(--sidebar-border) 25%, transparent) !important;
+}
+
+.dark html.glass-mode .glass-header {
+  background: color-mix(in srgb, var(--background) 60%, transparent) !important;
+  border-bottom-color: color-mix(in srgb, var(--border) 20%, transparent) !important;
+}
+
+.dark html.glass-mode .glass-panel {
+  background: color-mix(in srgb, var(--card) 80%, transparent) !important;
+  border-color: color-mix(in srgb, var(--border) 30%, transparent) !important;
+}
+
+/* ── Input focus improvements ── */
+input:focus, textarea:focus, [data-slot="input"]:focus, [data-slot="textarea"]:focus {
+  box-shadow: 0 0 0 2px var(--ring), 0 1px 2px rgba(0,0,0,0.05) !important;
+}
+
+/* ── Touch interaction ── */
+* { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+
+/* ── Stat card extras ── */
+.stat-card .stat-value { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; }
+.stat-card .stat-icon { @apply h-9 w-9 rounded-xl flex items-center justify-center; }
+
+/* ── Card modern ── */
+.card-modern { @apply bg-card shadow-sm transition-all duration-200; }
+.card-modern:hover { @apply shadow-md; }
+
+/* ── Sidebar expand/collapse animation ── */
+[data-slot="sidebar-menu-sub"] {
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+/* ── Chat message classes ── */
+.chat-msg-user { @apply bg-gradient-to-br from-primary/20 to-primary/10 text-foreground; }
+.chat-msg-assistant { @apply bg-muted/60 text-foreground; }
+
+/* ── Skeleton pulse ── */
+.skeleton-pulse {
+  background: linear-gradient(90deg, var(--muted) 25%, color-mix(in srgb, var(--muted) 60%, var(--primary)) 50%, var(--muted) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* ── Dialog shadow ── */
+[data-slot="dialog-content"] { box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25) !important; overscroll-behavior: contain; }
+
+/* ── Tooltip refinement ── */
+[data-slot="tooltip-content"] { @apply text-xs px-2.5 py-1.5 rounded-lg shadow-md border; }
+}
 

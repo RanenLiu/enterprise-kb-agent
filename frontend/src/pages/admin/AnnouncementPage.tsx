@@ -171,11 +171,11 @@ export function AnnouncementPage() {
     <div className="list-page animate-fade-in">
       <div className="list-header flex items-center justify-between shrink-0">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">系统公告</h1>
-          <p className="text-sm text-muted-foreground mt-1">管理系统公告的发布与展示</p>
+          <h1 className="text-2xl font-bold tracking-tight text-balance">系统公告</h1>
+          <p className="text-sm text-muted-foreground/70 mt-0.5">管理系统公告的发布与展示</p>
         </div>
         <Button variant="default" size="sm" className="h-8 text-xs shadow-sm" onClick={openCreateAnn}>
-          <Plus className="mr-1 h-3 w-3" />新建公告
+          <Plus className="mr-1 h-3 w-3" aria-hidden="true" aria-hidden="true" />新建公告
         </Button>
       </div>
       <div className="list-card">
@@ -193,7 +193,7 @@ export function AnnouncementPage() {
                 <DateTimePicker placeholder="开始时间" value={startDate} onChange={(v) => setStartDate(v)} />
                 <span className="text-xs text-muted-foreground">~</span>
                 <DateTimePicker placeholder="结束时间" value={endDate} onChange={(v) => setEndDate(v)} />
-                <Button variant="default" size="sm" className="h-8 text-xs shadow-sm" onClick={doFilter}><Search className="h-3 w-3 mr-1" />搜索</Button>
+                <Button variant="default" size="sm" className="h-8 text-xs shadow-sm" onClick={doFilter}><Search className="h-3 w-3 mr-1" aria-hidden="true" />搜索</Button>
                 <Button variant="default" size="sm" className="h-8 text-xs shadow-sm" onClick={handleReset}>
                   <RotateCcw className="mr-1 h-3 w-3" />重置
                 </Button>
@@ -237,7 +237,7 @@ export function AnnouncementPage() {
                       <TableCell>
                         <div className="flex gap-0.5" onClick={(e) => e.stopPropagation()}>
                           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditAnn(a)} title="编辑" disabled={annSaving}>
-                            <Pencil className="h-3.5 w-3.5" />
+                            <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                           </Button>
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={() => handleToggleAnnouncement(a)} title={a.is_active ? '停用' : '启用'} disabled={annSaving}>
                             <EyeOff className="h-3.5 w-3.5" />
@@ -246,7 +246,7 @@ export function AnnouncementPage() {
                             <CheckCheck className="h-3.5 w-3.5" />
                           </Button>
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive/70 hover:text-destructive" onClick={() => handleDeleteAnnouncement(a)} title="删除" disabled={annSaving}>
-                            <Trash2 className="h-3.5 w-3.5" />
+                            <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                           </Button>
                         </div>
                       </TableCell>
@@ -358,7 +358,7 @@ export function AnnouncementPage() {
                     {statsData.has_more && (
                       <Button variant="ghost" className="w-full h-9 text-xs rounded-none text-muted-foreground" onClick={loadMoreReaders} disabled={statsLoading}>
                         <ChevronDown className="h-3 w-3 mr-1" />
-                        {statsLoading ? '加载中...' : '加载更多'}
+                        {statsLoading ? '加载中…' : '加载更多'}
                       </Button>
                     )}
                   </div>

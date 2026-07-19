@@ -67,8 +67,8 @@ export function SettingsPage() {
     <div className="list-page animate-fade-in">
       <div className="list-header flex items-center justify-between shrink-0">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">系统设置</h1>
-          <p className="text-sm text-muted-foreground mt-1">查看系统基本信息</p>
+          <h1 className="text-2xl font-bold tracking-tight text-balance">系统设置</h1>
+          <p className="text-sm text-muted-foreground/70 mt-0.5">查看系统基本信息</p>
         </div>
       </div>
       <div className="list-card space-y-4">
@@ -77,7 +77,7 @@ export function SettingsPage() {
       {isTenantAdmin && (
         <div className="page-section">
           <Card className="border shadow-sm gap-0">
-            <CardHeader className="border-b bg-muted/30 pb-3">
+            <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <Building2 className="h-4 w-4 text-primary" />
                 租户品牌
@@ -85,7 +85,7 @@ export function SettingsPage() {
             </CardHeader>
             <CardContent className="px-6 py-4 space-y-4">
               {loading ? (
-                <p className="text-sm text-muted-foreground animate-pulse">加载中...</p>
+                <p className="text-sm text-muted-foreground animate-pulse">加载中…</p>
               ) : (
                 <>
                   <div className="grid grid-cols-2 gap-4">
@@ -100,7 +100,7 @@ export function SettingsPage() {
                   </div>
                   <div className="flex items-center gap-3">
                     <Button variant="outline" size="sm" onClick={() => logoInputRef.current?.click()} disabled={logoUploading} className="h-8 text-xs">
-                      <Upload className="mr-1 h-3 w-3" />{logoUploading ? '上传中...' : '上传 Logo'}
+                      <Upload className="mr-1 h-3 w-3" />{logoUploading ? '上传中…' : '上传 Logo'}
                     </Button>
                     <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={handleUploadLogo} />
                     {tenant.logo && (
@@ -117,7 +117,7 @@ export function SettingsPage() {
 
       <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2 page-section min-w-0">
         <Card className="border shadow-sm mb-6 gap-0">
-          <CardHeader className="border-b bg-muted/30 pb-3">
+          <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Settings className="h-4 w-4 text-primary" />
               系统信息
@@ -139,7 +139,7 @@ export function SettingsPage() {
           </CardContent>
         </Card>
         <Card className="border shadow-sm mb-6 gap-0">
-          <CardHeader className="border-b bg-muted/30 pb-3">
+          <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Mail className="h-4 w-4 text-primary" />
               联系我们

@@ -42,10 +42,18 @@ async def lifespan(app: FastAPI):
     import kb_biz.services.instances as di
 
     di.storage_client = MinioClient()
-    try:
-        await di.storage_client.ensure_bucket()
-    except Exception as e:
-        logger.warning("Bucket ensure failed (may be already created): %s", e)
+    # Retry bucket creation — MinIO may not be ready immediately
+    import asyncio as _asyncio
+    for attempt in range(5):
+        try:
+            await di.storage_client.ensure_bucket()
+            break
+        except Exception as e:
+            if attempt < 4:
+                logger.warning("Bucket ensure attempt %d failed, retrying: %s", attempt + 1, e)
+                await _asyncio.sleep(2 ** attempt)
+            else:
+                logger.warning("Bucket ensure failed after 5 attempts: %s", e)
     logger.info("Storage client initialized")
 
     # Wire up RAG pipeline (LlamaIndex)

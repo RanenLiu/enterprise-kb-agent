@@ -36,17 +36,17 @@ function ReasoningBlock({ content, initiallyExpanded }: { content: string; initi
   }
 
   return (
-    <div className="mb-3 rounded-lg border border-muted-foreground/20 bg-muted/50 overflow-hidden">
+    <div className="mb-3 rounded-lg border border-primary/10 bg-primary/[0.02] overflow-hidden">
       <button
         className="flex items-center gap-1.5 w-full px-3 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
         onClick={handleToggle}
       >
-        <Brain className="h-3.5 w-3.5" />
+        <Brain className="h-3.5 w-3.5 text-primary/60" />
         <span className="font-medium">思考过程</span>
-        {collapsed ? <ChevronRight className="h-3 w-3 ml-auto" /> : <ChevronDown className="h-3 w-3 ml-auto" />}
+        {collapsed ? <ChevronRight className="h-3 w-3 ml-auto text-muted-foreground/40" /> : <ChevronDown className="h-3 w-3 ml-auto text-muted-foreground/40" />}
       </button>
       {!collapsed && (
-        <div className="px-3 pb-2 text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap border-t border-muted-foreground/10 pt-2">
+        <div className="px-3 pb-2 text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap border-t border-primary/5 pt-2">
           {displayed ? content : <div ref={textRef} />}
         </div>
       )}
@@ -75,9 +75,9 @@ export function MessageBubble({ message, chunks, isStreaming, isLastUser, onEdit
     // 编辑模式
     return (
       <div className="flex justify-end">
-        <div className="max-w-[75%] rounded-2xl rounded-br-sm bg-primary text-primary-foreground p-3 space-y-2">
+        <div className="max-w-[75%] rounded-2xl rounded-br-sm bg-gradient-to-br from-primary to-primary/90 text-primary-foreground p-3 space-y-2 shadow-md">
           <textarea
-            className="w-full bg-transparent text-sm resize-none outline-none border-b border-primary-foreground/20 pb-1"
+            className="w-full bg-transparent text-sm resize-none outline-none border-b border-primary-foreground/20 pb-1 placeholder:text-primary-foreground/40"
             rows={3}
             value={editContent || ''}
             onChange={e => onEditContentChange?.(e.target.value)}
@@ -85,8 +85,8 @@ export function MessageBubble({ message, chunks, isStreaming, isLastUser, onEdit
             autoFocus
           />
           <div className="flex gap-2 justify-end">
-            <button onClick={onEditCancel} className="p-1 rounded hover:bg-primary-foreground/10 transition-colors"><X className="h-3.5 w-3.5" /></button>
-            <button onClick={onEditSubmit} className="p-1 rounded hover:bg-primary-foreground/10 transition-colors"><Check className="h-3.5 w-3.5" /></button>
+            <button onClick={onEditCancel} className="p-1.5 rounded-lg hover:bg-primary-foreground/10 transition-colors"><X className="h-3.5 w-3.5" /></button>
+            <button onClick={onEditSubmit} className="p-1.5 rounded-lg hover:bg-primary-foreground/10 transition-colors"><Check className="h-3.5 w-3.5" /></button>
           </div>
         </div>
       </div>
@@ -116,7 +116,7 @@ export function MessageBubble({ message, chunks, isStreaming, isLastUser, onEdit
                 <p className="text-[10px] text-foreground/40">{new Date(message.created_at).toLocaleString("zh-CN", { hour12: false })}</p>
                 <button onClick={() => { navigator.clipboard.writeText(message.content); toast.success('已复制') }}
                   className="text-[10px] text-foreground/30 hover:text-foreground/60 transition-colors cursor-pointer"
-                  title="复制内容">
+                  title="复制内容" aria-label="复制内容">
                   <Copy className="h-3 w-3" />
                 </button>
               </div>
@@ -125,7 +125,7 @@ export function MessageBubble({ message, chunks, isStreaming, isLastUser, onEdit
               <button
                 onClick={() => onEdit(message.id, message.content)}
                 className="absolute -left-8 top-1/2 -translate-y-1/2 p-1 rounded-md text-muted-foreground/40 hover:text-muted-foreground hover:bg-muted transition-colors"
-                title="编辑"
+                title="编辑" aria-label="编辑"
               >
                 <Pencil className="h-3.5 w-3.5" />
               </button>
@@ -153,7 +153,7 @@ export function MessageBubble({ message, chunks, isStreaming, isLastUser, onEdit
                 <p className="text-[10px] text-foreground/40">{new Date(message.created_at).toLocaleString("zh-CN", { hour12: false })}</p>
                 <button onClick={() => { navigator.clipboard.writeText(message.content); toast.success('已复制') }}
                   className="text-[10px] text-foreground/30 hover:text-foreground/60 transition-colors cursor-pointer"
-                  title="复制内容">
+                  title="复制内容" aria-label="复制内容">
                   <Copy className="h-3 w-3" />
                 </button>
               </div>

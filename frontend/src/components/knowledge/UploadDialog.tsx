@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button'
 import { api } from '@/api/client'
 import { toast } from 'sonner'
 
+const IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'tiff', 'tif'])
+
 interface UploadDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -16,12 +18,26 @@ export function UploadDialog({ open, onOpenChange, onSuccess }: UploadDialogProp
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
-    const dropped = Array.from(e.dataTransfer.files)
+    const dropped = Array.from(e.dataTransfer.files).filter(f => {
+      const ext = f.name.split('.').pop()?.toLowerCase()
+      if (ext && IMAGE_EXTENSIONS.has(ext)) {
+        toast.warning(`不支持上传图片文件：${f.name}`)
+        return false
+      }
+      return true
+    })
     setFiles(prev => [...prev, ...dropped])
   }, [])
 
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = Array.from(e.target.files || [])
+    const selected = Array.from(e.target.files || []).filter(f => {
+      const ext = f.name.split('.').pop()?.toLowerCase()
+      if (ext && IMAGE_EXTENSIONS.has(ext)) {
+        toast.warning(`不支持上传图片文件：${f.name}`)
+        return false
+      }
+      return true
+    })
     setFiles(prev => [...prev, ...selected])
   }, [])
 
@@ -55,7 +71,7 @@ export function UploadDialog({ open, onOpenChange, onSuccess }: UploadDialogProp
           onDragOver={e => e.preventDefault()}
           onClick={() => document.getElementById('file-input')?.click()}
         >
-          <p className="text-muted-foreground mb-2">拖拽文件到此处，或点击选择</p>
+          <p className="text-muted-foreground mb-2 text-sm">拖拽文件到此处，或点击选择</p>
           <p className="text-xs text-muted-foreground">
             支持 PDF/DOCX/XLSX/PPTX/MD/TXT/CSV/邮件，上限 50MB
           </p>

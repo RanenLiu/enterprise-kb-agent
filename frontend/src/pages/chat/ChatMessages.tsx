@@ -32,10 +32,10 @@ export function ChatMessages({ messages, chunksByMsg, graphByMsg, streamingText,
   const showStatus = status === 'searching' || status === 'thinking'
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-4">
+    <div className="flex-1 overflow-y-auto px-4 py-6 space-y-5">
       {messages.length === 0 && !isLoading && (
-        <div className="flex items-center justify-center h-full text-muted-foreground">
-          <p>开始你的第一个问题</p>
+        <div className="flex items-center justify-center h-full">
+          <p className="text-sm text-muted-foreground/60" role="status">开始你的第一个问题</p>
         </div>
       )}
       {messages.map((m, i) => {
