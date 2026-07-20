@@ -8,21 +8,18 @@ user import) live in kb-enterprise and are NOT registered here.
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from kb_adapter_postgres.session import async_session_factory, get_session
-from kb_biz.core.auth.deps import PermissionChecker, RoleChecker, get_current_user
-from kb_biz.models.user import User
+from kb_adapter_postgres.session import async_session_factory
 from kb_biz.api.v1 import (
     admin as admin_router,
     auth as auth_router,
     chat as chat_router,
     knowledge as knowledge_router,
     logs as logs_router,
+    homepage as homepage_router,
+    tenant as tenant_router,
 )
 from kb_biz.config.settings import settings
 from kb_biz.core.logging import setup_logging
@@ -161,8 +158,6 @@ async def lifespan(app: FastAPI):
 
     logger.info("Shutting down Enterprise KB backend")
 
-    logger.info("Shutting down Enterprise KB backend")
-
 
 def create_app() -> FastAPI:
     app = FastAPI(
@@ -195,62 +190,8 @@ def create_app() -> FastAPI:
     app.include_router(chat_router.router, prefix="/api/v1")
     app.include_router(knowledge_router.router, prefix="/api/v1")
     app.include_router(logs_router.router, prefix="/api/v1")
-
-    # Sidebar tenant info stub (frontend requests this on every page)
-    from fastapi import APIRouter
-    from kb_biz.schemas.common import Response
-
-    _stub = APIRouter()
-
-    @_stub.get("/admin/tenant", response_model=Response)
-    async def _stub_tenant(
-        current_user: User = Depends(get_current_user),
-        session: AsyncSession = Depends(get_session),
-    ):
-        from kb_biz.models.tenant import Tenant
-        tenant = await session.execute(
-            select(Tenant).where(Tenant.id == current_user.tenant_id)
-        )
-        tenant = tenant.scalar_one_or_none()
-        if tenant:
-            return Response(data={"name": tenant.name, "logo": tenant.logo})
-        return Response(data={"name": "企业知识库", "logo": None})
-
-    @_stub.put("/admin/tenant", response_model=Response)
-    async def _stub_update_tenant(
-        body: dict,
-        current_user: User = Depends(get_current_user),
-        _: User = Depends(RoleChecker(["super_admin", "tenant_admin"])),
-        session: AsyncSession = Depends(get_session),
-    ):
-        """Update tenant name and logo (open source stub)."""
-        from kb_biz.models.tenant import Tenant
-
-        name = body.get("name", "企业知识库")
-        logo = body.get("logo")
-
-        tenant = await session.execute(
-            select(Tenant).where(Tenant.id == current_user.tenant_id)
-        )
-        tenant = tenant.scalar_one_or_none()
-        if tenant:
-            tenant.name = name
-            if logo is not None:
-                tenant.logo = logo
-            session.add(tenant)
-            await session.commit()
-        return Response(data={"name": name, "logo": logo})
-
-    @_stub.get("/admin/tenants", response_model=Response)
-    async def _stub_tenants():
-        return Response(
-            data=[
-                {"id": "default", "name": "企业知识库", "code": "default", "status": 1}
-            ],
-            meta={"total": 1, "page": 1, "page_size": 20},
-        )
-
-    app.include_router(_stub, prefix="/api/v1")
+    app.include_router(homepage_router.router, prefix="/api/v1")
+    app.include_router(tenant_router.router, prefix="/api/v1")
 
     return app
 

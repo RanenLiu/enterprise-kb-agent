@@ -1,22 +1,40 @@
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { useAuth } from '@/hooks/useAuth'
 import { BookOpen, MessageSquare, Shield, Server, Database, Cpu, ArrowRight } from 'lucide-react'
+
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  MessageSquare,
+  BookOpen,
+  Shield,
+  Database,
+  Cpu,
+}
+
+interface FeatureCard {
+  icon: string
+  title: string
+  desc: string
+  color: string
+  iconColor: string
+  perm: string
+}
 
 export function HomePage() {
   const { user } = useAuth()
   const perms = user?.permissions ?? []
-
   const has = (code: string) => perms.includes(code)
-  const isSuper = has('admin') // super_admin has all perms, but we check document for viewer
+  const isSuper = has('admin')
+  const [features, setFeatures] = useState<FeatureCard[]>([])
 
-  const features = [
-    { icon: MessageSquare, title: '智能问答', desc: '基于 RAG 的精准问答，多路召回 + 精排，流式输出', color: 'from-violet-500/20 to-purple-500/10', iconColor: 'text-violet-600', perm: 'chat.access' },
-    { icon: BookOpen, title: '知识库管理', desc: '多格式文档上传、解析、分块、索引，支持 PDF/Word/PPT/Excel', color: 'from-blue-500/20 to-cyan-500/10', iconColor: 'text-blue-600', perm: 'document.create' },
-    { icon: Shield, title: '权限管控', desc: 'RBAC 五级角色体系，租户 Partition + 部门字段级数据隔离', color: 'from-amber-500/20 to-orange-500/10', iconColor: 'text-amber-600', perm: 'system.config' },
-    { icon: Database, title: '多模型支持', desc: 'DeepSeek / OpenAI / Ollama vLLM 多 Provider 切换', color: 'from-rose-500/20 to-pink-500/10', iconColor: 'text-rose-600', perm: 'llm_config.read' },
-    { icon: Cpu, title: '系统监控', desc: '实时服务状态监控，全链路 trace_id 追踪', color: 'from-indigo-500/20 to-blue-500/10', iconColor: 'text-indigo-600', perm: 'system.monitor' },
-  ].filter((f) => has(f.perm))
+  useEffect(() => {
+    fetch('/api/v1/config/features')
+      .then(res => res.json())
+      .then(json => setFeatures(json.data || []))
+      .catch(() => setFeatures([]))
+  }, [])
+
+  const visibleFeatures = features.filter(f => has(f.perm))
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -34,7 +52,7 @@ export function HomePage() {
               </span>
             </div>
             <h1 className="text-3xl font-bold tracking-tight text-foreground text-balance">让知识流动起来，回答唾手可得</h1>
-            <p className="text-muted-foreground mt-3 leading-relaxed max-w-2xl">把文档交给它，它就变成了最懂你们业务的问答专家。团队成员只管提问，答案从知识库中来，准确实在。每个部门的数据天然隔离，安全可靠。</p>
+            <p className="text-muted-foreground mt-3 leading-relaxed">把文档交给它，它就变成了最懂你们业务的问答专家。团队成员只管提问，答案从知识库中来，准确实在。每个部门的数据天然隔离，安全可靠。</p>
             <div className="flex gap-3 mt-6">
               {has('chat.access') && (
                 <a href="/chat"
@@ -56,16 +74,16 @@ export function HomePage() {
       </div>
 
       {/* Feature cards */}
-      {features.length > 0 && (
+      {visibleFeatures.length > 0 && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 page-section">
-          {features.map((f, i) => {
-            const Icon = f.icon
+          {visibleFeatures.map((f, i) => {
+            const Icon = ICON_MAP[f.icon]
             return (
               <Card key={f.title} className="card-modern overflow-hidden" style={{ animationDelay: `${i * 0.05}s` }}>
-                <div className={`h-1.5 bg-gradient-to-r ${f.color}`} />
+                <div className="h-1.5" style={{ background: f.color }} />
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
-                    <div className={`p-1.5 rounded-lg bg-gradient-to-br ${f.color}`}>
+                    <div className="p-1.5 rounded-lg" style={{ background: f.color?.replace('to right', 'to bottom right') }}>
                       <Icon className={`h-4 w-4 ${f.iconColor}`} />
                     </div>
                     {f.title}

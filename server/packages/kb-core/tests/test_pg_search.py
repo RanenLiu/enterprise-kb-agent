@@ -58,6 +58,7 @@ class TestPGSearch:
         mock_row.dept_id = "dept-1"
         mock_row.content = "test content"
         mock_row.heading_path = ""
+        mock_row.page_range = ""
         mock_row.visualization = "dept"
         mock_row.score = 0.95
         mock_row.visibility = "dept"
