@@ -176,7 +176,7 @@ export function RolePage() {
             <DialogHeader>
               <DialogTitle className="text-lg">{editing ? '编辑角色' : '新建角色'}</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 py-2" autoComplete="off"><div aria-hidden="true" style={{position:'absolute',left:-9999}}><input type="text" tabIndex={-1} autoComplete="username" /><input type="password" tabIndex={-1} autoComplete="current-password" /></div>
+            <div className="space-y-4 py-2 max-md:overflow-y-auto max-md:flex-1" autoComplete="off"><div aria-hidden="true" style={{position:'absolute',left:-9999}}><input type="text" tabIndex={-1} autoComplete="username" /><input type="password" tabIndex={-1} autoComplete="current-password" /></div>
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">名称 <span className="text-destructive">*</span></Label>
                   <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="如：部门管理员" className="focus-visible:ring-1" />
@@ -211,10 +211,10 @@ export function RolePage() {
                   ))}
                 </div>
               </div>
-              <Button onClick={handleSave} className="w-full mt-2 shadow-sm">
+            </div>
+              <Button onClick={handleSave} className="w-full shadow-sm max-md:shrink-0">
                 {editing ? '保存修改' : '创建角色'}
               </Button>
-            </div>
           </DialogContent>
         </Dialog>
 

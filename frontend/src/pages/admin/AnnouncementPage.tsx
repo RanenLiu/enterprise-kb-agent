@@ -188,15 +188,17 @@ export function AnnouncementPage() {
               </CardTitle>
             </div>
             <div className="flex gap-3 flex-wrap mt-3">
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 flex-wrap">
                 <span className="text-xs text-muted-foreground">时间</span>
                 <DateTimePicker placeholder="开始时间" value={startDate} onChange={(v) => setStartDate(v)} />
                 <span className="text-xs text-muted-foreground">~</span>
                 <DateTimePicker placeholder="结束时间" value={endDate} onChange={(v) => setEndDate(v)} />
-                <Button variant="default" size="sm" className="h-8 text-xs shadow-sm" onClick={doFilter}><Search className="h-3 w-3 mr-1" aria-hidden="true" />搜索</Button>
-                <Button variant="default" size="sm" className="h-8 text-xs shadow-sm" onClick={handleReset}>
-                  <RotateCcw className="mr-1 h-3 w-3" />重置
-                </Button>
+                <div className="flex items-center gap-1.5 w-full md:w-auto mt-1 md:mt-0">
+                  <Button variant="default" size="sm" className="h-8 text-xs shadow-sm" onClick={doFilter}><Search className="h-3 w-3 mr-1" aria-hidden="true" />搜索</Button>
+                  <Button variant="default" size="sm" className="h-8 text-xs shadow-sm" onClick={handleReset}>
+                    <RotateCcw className="mr-1 h-3 w-3" />重置
+                  </Button>
+                </div>
               </div>
             </div>
           </CardHeader>
@@ -287,7 +289,7 @@ export function AnnouncementPage() {
           <DialogHeader>
             <DialogTitle className="text-lg">{annEditing ? '编辑公告' : '新建公告'}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-2">
+          <div className="space-y-4 py-2 max-md:overflow-y-auto max-md:flex-1">
             <div className="space-y-2">
               <Label className="text-sm font-medium">公告标题</Label>
               <Input value={annForm.title} onChange={(e) => setAnnForm({ ...annForm, title: e.target.value })} placeholder="如：系统升级通知" className="focus-visible:ring-1" />
@@ -302,10 +304,10 @@ export function AnnouncementPage() {
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none"
               />
             </div>
-            <Button onClick={handleSaveAnn} className="w-full mt-2 shadow-sm" disabled={annSaving}>
+          </div>
+            <Button onClick={handleSaveAnn} className="w-full shadow-sm max-md:shrink-0" disabled={annSaving}>
               {annEditing ? '保存修改' : '发布公告'}
             </Button>
-          </div>
         </DialogContent>
       </Dialog>
 

@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { api } from '@/api/client'
 import { useAuth } from '@/hooks/useAuth'
-import { FileText, LogIn, RotateCcw, Search } from 'lucide-react'
+import { FileText, LogIn, RotateCcw, Search, Columns3 } from 'lucide-react'
 import { DateTimePicker } from '@/components/DateTimePicker'
 
 const ACTION_LABELS: Record<string, string> = {
@@ -56,6 +56,30 @@ export function LogPage() {
   const [filters, setFilters] = useState(initFromParams)
   const [searchTrigger, setSearchTrigger] = useState(0)
   const filtersRef = useRef(filters)
+  const colPickerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      const picker = document.getElementById('col-picker');
+      if (picker && !picker.classList.contains('hidden') && colPickerRef.current && !colPickerRef.current.contains(e.target as Node)) {
+        picker.classList.add('hidden')
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  const [opCols, setOpCols] = useState<Record<string, boolean>>({
+    resource: true, action: true, dept: true, user: true, operator: true, ip: false, result: true, time: true,
+  })
+  const [loginCols, setLoginCols] = useState<Record<string, boolean>>({
+    username: true, operator: true, dept: true, login_type: false, ip: false, result: true, fail_reason: true, time: true,
+  })
+  const cols = tab === 'operation' ? opCols : loginCols
+  const setCols = tab === 'operation' ? setOpCols : setLoginCols
+  const colLabelsOp: Record<string, string> = { resource: '资源', action: '操作类型', dept: '部门', user: '用户', operator: '操作人', ip: 'IP', result: '结果', time: '时间' }
+  const colLabelsLogin: Record<string, string> = { username: '用户名', operator: '操作人', dept: '部门', login_type: '登录方式', ip: 'IP', result: '结果', fail_reason: '失败原因', time: '时间' }
+  const colLabels = tab === 'operation' ? colLabelsOp : colLabelsLogin
 
   const showDeptSelect = isTenantAdmin || (isSuper && filters.tenant_id !== '_all')
   const deptOptions = isSuper && filters.tenant_id !== '_all'
@@ -155,7 +179,21 @@ export function LogPage() {
                 {tab === 'operation' ? <FileText className="h-4 w-4 text-primary" /> : <LogIn className="h-4 w-4 text-primary" />}
                 {tab === 'operation' ? '操作日志' : '登录日志'}
               </CardTitle>
-              <div className="flex ml-auto gap-1">
+              <div ref={colPickerRef} className="relative ml-auto flex gap-1">
+                <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => { document.getElementById('col-picker')?.classList.toggle('hidden') }}>
+                  <Columns3 className="h-3 w-3 mr-1" />列
+                </Button>
+                <div id="col-picker" className="absolute top-full right-0 mt-1 z-50 hidden min-w-[140px] rounded-lg border bg-popover p-2 shadow-lg" onClick={(e) => e.stopPropagation()}>
+                  {Object.entries(colLabels).map(([k, v]) => (
+                    <label key={k} className="flex items-center gap-2 px-2 py-1.5 text-sm rounded hover:bg-muted cursor-pointer whitespace-nowrap">
+                      <input type="checkbox" checked={tab === 'operation' ? !!opCols[k as keyof typeof opCols] : !!loginCols[k as keyof typeof loginCols]} onChange={() => {
+                        const next = { ...cols, [k]: !cols[k as keyof typeof cols] }
+                        setCols(next)
+                      }} />
+                      {v}
+                    </label>
+                  ))}
+                </div>
                 <Button variant={tab === 'operation' ? 'default' : 'ghost'} size="sm" className="h-8 text-xs" onClick={() => { setTab('operation'); setPage(1); setFilters((prev) => ({ ...prev, start_time: '', end_time: '', tenant_id: '_all', dept_id: '_all' })) }}>
                   操作日志
                 </Button>
@@ -289,24 +327,24 @@ export function LogPage() {
                   <TableRow className="bg-muted/20">
                     {tab === 'operation' ? (
                       <>
-                        <TableHead className="font-medium w-[22%]">资源</TableHead>
-                        <TableHead className="font-medium w-[8%]">操作类型</TableHead>
-                        <TableHead className="font-medium w-[10%]">部门</TableHead>
-                        <TableHead className="font-medium w-[10%]">用户</TableHead>
-                        <TableHead className="font-medium w-[12%]">操作人</TableHead>
-                        <TableHead className="font-medium w-[8%]">IP</TableHead>
-                        <TableHead className="font-medium w-[8%]">结果</TableHead>
-                        <TableHead className="font-medium w-[14%]">时间</TableHead></>
+                        <TableHead className={`font-medium ${opCols.resource ? '' : 'hidden'}`}>资源</TableHead>
+                        <TableHead className={`font-medium ${opCols.action ? '' : 'hidden'}`}>操作类型</TableHead>
+                        <TableHead className={`font-medium ${opCols.dept ? '' : 'hidden'}`}>部门</TableHead>
+                        <TableHead className={`font-medium ${opCols.user ? '' : 'hidden'}`}>用户</TableHead>
+                        <TableHead className={`font-medium ${opCols.operator ? '' : 'hidden'}`}>操作人</TableHead>
+                        <TableHead className={`font-medium ${opCols.ip ? '' : 'hidden'}`}>IP</TableHead>
+                        <TableHead className={`font-medium ${opCols.result ? '' : 'hidden'}`}>结果</TableHead>
+                        <TableHead className={`font-medium ${opCols.time ? '' : 'hidden'}`}>时间</TableHead></>
                     ) : (
                       <>
-                        <TableHead className="font-medium w-[12%]">用户名</TableHead>
-                        <TableHead className="font-medium w-[12%]">操作人</TableHead>
-                        <TableHead className="font-medium w-[10%]">部门</TableHead>
-                        <TableHead className="font-medium hidden md:table-cell w-[12%]">登录方式</TableHead>
-                        <TableHead className="font-medium hidden sm:table-cell w-[12%]">IP</TableHead>
-                        <TableHead className="font-medium w-[10%]">结果</TableHead>
-                        <TableHead className="font-medium w-[18%]">失败原因</TableHead>
-                        <TableHead className="font-medium w-[14%]">时间</TableHead>
+                        <TableHead className={`font-medium ${loginCols.username ? '' : 'hidden'}`}>用户名</TableHead>
+                        <TableHead className={`font-medium ${loginCols.operator ? '' : 'hidden'}`}>操作人</TableHead>
+                        <TableHead className={`font-medium ${loginCols.dept ? '' : 'hidden'}`}>部门</TableHead>
+                        <TableHead className={`font-medium hidden md:table-cell ${loginCols.login_type ? '' : 'hidden'}`}>登录方式</TableHead>
+                        <TableHead className={`font-medium hidden sm:table-cell ${loginCols.ip ? '' : 'hidden'}`}>IP</TableHead>
+                        <TableHead className={`font-medium ${loginCols.result ? '' : 'hidden'}`}>结果</TableHead>
+                        <TableHead className={`font-medium ${loginCols.fail_reason ? '' : 'hidden'}`}>失败原因</TableHead>
+                        <TableHead className={`font-medium ${loginCols.time ? '' : 'hidden'}`}>时间</TableHead>
                       </>
                     )}
                   </TableRow>
@@ -320,7 +358,7 @@ export function LogPage() {
                     <TableRow key={l.id} className={idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'}>
                       {tab === 'operation' ? (
                         <>
-                          <TableCell>
+                          <TableCell className={opCols.resource ? '' : 'hidden'}>
                             <span className="inline-flex items-center gap-1.5">
                               <Badge variant="secondary" className="text-xs font-normal px-1.5 py-0">{RESOURCE_LABELS[l.resource_type] || l.resource_type}</Badge>
                               {l.detail?.changes?.length > 0 && (
@@ -328,31 +366,31 @@ export function LogPage() {
                               )}
                             </span>
                           </TableCell>
-                          <TableCell>
+                          <TableCell className={opCols.action ? '' : 'hidden'}>
                             <Badge variant="outline" className="text-xs font-normal font-mono">{ACTION_LABELS[l.action_type] || l.action_type}</Badge>
                           </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">{l.dept_name || '-'}</TableCell>
-                          <TableCell className="text-sm">{l.user_name || '-'}</TableCell>
-                          <TableCell className="text-sm">{l.display_name || '-'}</TableCell>
-                          <TableCell className="text-sm text-muted-foreground">{l.ip_address || '-'}</TableCell>
-                          <TableCell>
+                          <TableCell className={`text-sm text-muted-foreground ${opCols.dept ? '' : 'hidden'}`}>{l.dept_name || '-'}</TableCell>
+                          <TableCell className={`text-sm ${opCols.user ? '' : 'hidden'}`}>{l.user_name || '-'}</TableCell>
+                          <TableCell className={`text-sm ${opCols.operator ? '' : 'hidden'}`}>{l.display_name || '-'}</TableCell>
+                          <TableCell className={`text-sm text-muted-foreground ${opCols.ip ? '' : 'hidden'}`}>{l.ip_address || '-'}</TableCell>
+                          <TableCell className={opCols.result ? '' : 'hidden'}>
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-normal ${l.result === 'success' ? 'bg-success/15 text-success' : 'bg-destructive/15 text-destructive'
                               }`}>{l.result === 'success' ? '成功' : '失败'}</span>
                           </TableCell>
-                          <TableCell className="text-sm whitespace-nowrap text-muted-foreground">{new Date(l.created_at).toLocaleString('zh-CN', { hour12: false })}</TableCell></>
+                          <TableCell className={`text-sm whitespace-nowrap text-muted-foreground ${opCols.time ? '' : 'hidden'}`}>{new Date(l.created_at).toLocaleString('zh-CN', { hour12: false })}</TableCell></>
                       ) : (
                         <>
-                          <TableCell className="text-sm">{l.username}</TableCell>
-                          <TableCell className="text-sm text-muted-foreground">{l.display_name || '-'}</TableCell>
-                          <TableCell className="text-sm text-muted-foreground">{l.dept_name || "-"}</TableCell>
-                          <TableCell className="hidden md:table-cell text-sm text-muted-foreground">{l.login_type}</TableCell>
-                          <TableCell className="hidden sm:table-cell text-sm text-muted-foreground">{l.ip_address || '-'}</TableCell>
-                          <TableCell>
+                          <TableCell className={`text-sm ${loginCols.username ? '' : 'hidden'}`}>{l.username}</TableCell>
+                          <TableCell className={`text-sm text-muted-foreground ${loginCols.operator ? '' : 'hidden'}`}>{l.display_name || '-'}</TableCell>
+                          <TableCell className={`text-sm text-muted-foreground ${loginCols.dept ? '' : 'hidden'}`}>{l.dept_name || "-"}</TableCell>
+                          <TableCell className={`hidden md:table-cell text-sm text-muted-foreground ${loginCols.login_type ? '' : 'hidden'}`}>{l.login_type}</TableCell>
+                          <TableCell className={`hidden sm:table-cell text-sm text-muted-foreground ${loginCols.ip ? '' : 'hidden'}`}>{l.ip_address || '-'}</TableCell>
+                          <TableCell className={loginCols.result ? '' : 'hidden'}>
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-normal ${l.result === 'success' ? 'bg-success/15 text-success' : 'bg-destructive/15 text-destructive'
                               }`}>{l.result === 'success' ? '成功' : '失败'}</span>
                           </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">{l.failure_reason || '-'}</TableCell>
-                          <TableCell className="text-sm whitespace-nowrap">{new Date(l.created_at).toLocaleString('zh-CN', { hour12: false })}</TableCell>
+                          <TableCell className={`text-sm text-muted-foreground ${loginCols.fail_reason ? '' : 'hidden'}`}>{l.failure_reason || '-'}</TableCell>
+                          <TableCell className={`text-sm whitespace-nowrap ${loginCols.time ? '' : 'hidden'}`}>{new Date(l.created_at).toLocaleString('zh-CN', { hour12: false })}</TableCell>
                         </>
                       )}
                     </TableRow>

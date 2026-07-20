@@ -233,12 +233,12 @@ export function UserPage() {
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/20">
-                  <TableHead className="font-medium w-[12%]">用户名</TableHead>
-                  <TableHead className="font-medium w-[12%]">真实姓名</TableHead>
-                  <TableHead className="font-medium hidden md:table-cell w-[18%]">邮箱</TableHead>
-                  <TableHead className="font-medium hidden sm:table-cell w-[12%]">部门</TableHead>
-                  <TableHead className="font-medium hidden md:table-cell w-[18%]">角色</TableHead>
-                  <TableHead className="font-medium w-[8%]">状态</TableHead>
+                  <TableHead className="font-medium">用户名</TableHead>
+                  <TableHead className="font-medium">真实姓名</TableHead>
+                  <TableHead className="font-medium hidden md:table-cell">邮箱</TableHead>
+                  <TableHead className="font-medium hidden sm:table-cell">部门</TableHead>
+                  <TableHead className="font-medium hidden md:table-cell">角色</TableHead>
+                  <TableHead className="font-medium w-[60px]">状态</TableHead>
                   <TableHead className="font-medium w-[100px]">操作</TableHead>
                 </TableRow>
               </TableHeader>
@@ -313,8 +313,8 @@ export function UserPage() {
           <DialogHeader>
             <DialogTitle className="text-lg">{editing ? '编辑用户' : '新建用户'}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4 py-2 max-md:overflow-y-auto max-md:flex-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-sm font-medium">用户名</Label>
                 <Input value={form.username} disabled className="focus-visible:ring-1 bg-muted/30" />
@@ -324,7 +324,7 @@ export function UserPage() {
                 <Input value={form.display_name} onChange={(e) => setForm({ ...form, display_name: e.target.value })} autoComplete="name" className="focus-visible:ring-1" />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {!editing && (
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">密码 <span className="text-xs text-muted-foreground font-normal">（留空默认 admin123）</span></Label>
@@ -380,10 +380,10 @@ export function UserPage() {
                 </div>
               ) : null
             })()}
-            <Button onClick={handleSave} className="w-full mt-2 shadow-sm">
+          </div>
+            <Button onClick={handleSave} className="w-full shadow-sm max-md:shrink-0">
               {editing ? '保存修改' : '创建用户'}
             </Button>
-          </div>
         </DialogContent>
       </Dialog>
 

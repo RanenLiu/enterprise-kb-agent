@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/sidebar'
 import {
   Home, MessageSquare, Database, Settings, LayoutDashboard, Building2, Building,
-  Shield, Users, Menu, FileText, Activity, Cpu, ChevronRight, FolderKanban, type LucideIcon,
+  Shield, Users, Menu, FileText, Activity, Cpu, ChevronRight, FolderKanban, Megaphone, type LucideIcon,
 } from 'lucide-react'
 import { useTheme } from '@/hooks/useTheme'
 import { useAuth } from '@/hooks/useAuth'
@@ -23,7 +23,7 @@ import { api } from '@/api/client'
 const ICON_MAP: Record<string, LucideIcon> = {
   Home,
   MessageSquare, Database, Settings, LayoutDashboard, Building2, Building,
-  Shield, Users, Menu, FileText, Activity, Cpu, FolderKanban,
+  Shield, Users, Menu, FileText, Activity, Cpu, FolderKanban, Megaphone,
 }
 
 type MenuNode = {

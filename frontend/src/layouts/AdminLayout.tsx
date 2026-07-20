@@ -52,7 +52,9 @@ export function AdminLayout() {
             `.admin-table td,.admin-table th,.text-xs,.list-page .text-xs{font-size:13px!important}` +
             `.list-page .admin-table td,.list-page .admin-table th{font-size:13px!important}` +
             `.list-page,.list-page .list-header,.list-page .list-header :not(h1){font-size:13px!important}` +
-            `.list-page .list-header h1{font-size:18px!important}`
+            `.list-page .list-header h1{font-size:18px!important}` +
+            `[data-slot="sidebar-trigger"]{background:transparent!important}` +
+            `input:focus-visible,textarea:focus-visible,select:focus-visible{border-color:var(--ring)!important;box-shadow:none!important;outline:none!important}`
           document.head.appendChild(el)
         }
       } else if (el) {
@@ -139,7 +141,7 @@ export function AdminLayout() {
           <div className="flex-1" />
 
           {/* Accent color picker */}
-          <div ref={accentRef} className="relative max-md:hidden">
+          <div ref={accentRef} className="relative">
             <Button variant="ghost" size="icon" className={`h-9 w-9 rounded-full ${showAccents ? 'text-primary ring-2 ring-primary/30 ring-offset-1' : 'text-muted-foreground'}`} onClick={() => setShowAccents(!showAccents)} aria-label="主题色">
               <Palette className="h-4 w-4" aria-hidden="true" />
             </Button>
@@ -157,7 +159,7 @@ export function AdminLayout() {
           </div>
 
           {/* Glass mode toggle */}
-          <Button variant="ghost" size="icon" className={`h-9 w-9 rounded-full max-md:hidden ${glass ? 'text-primary bg-primary/10' : 'text-muted-foreground'}`} onClick={toggleGlass} aria-label="玻璃质感" title="玻璃质感">
+          <Button variant="ghost" size="icon" className={`h-9 w-9 rounded-full ${glass ? 'text-primary bg-primary/10' : 'text-muted-foreground'}`} onClick={toggleGlass} aria-label="玻璃质感" title="玻璃质感">
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M4 20h16" />
               <rect x="6" y="4" width="12" height="12" rx="2" opacity="0.5" />
@@ -166,7 +168,7 @@ export function AdminLayout() {
           </Button>
 
           {/* Filled icons toggle */}
-          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-muted-foreground max-md:hidden" onClick={toggleFilledIcons} aria-label={filledIcons ? '实心图标' : '线条图标'} title={filledIcons ? '实心图标' : '线条图标'}>
+          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-muted-foreground" onClick={toggleFilledIcons} aria-label={filledIcons ? '实心图标' : '线条图标'} title={filledIcons ? '实心图标' : '线条图标'}>
             <PaintBucket className={`h-4 w-4 ${filledIcons ? 'fill-primary text-primary' : ''}`} />
           </Button>
 

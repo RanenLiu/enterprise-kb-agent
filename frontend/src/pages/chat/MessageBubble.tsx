@@ -75,7 +75,7 @@ export function MessageBubble({ message, chunks, isStreaming, isLastUser, onEdit
     // 编辑模式
     return (
       <div className="flex justify-end">
-        <div className="max-w-[75%] rounded-2xl rounded-br-sm bg-gradient-to-br from-primary to-primary/90 text-primary-foreground p-3 space-y-2 shadow-md">
+        <div className="max-w-[75%] max-md:max-w-[90%] rounded-2xl rounded-br-sm bg-gradient-to-br from-primary to-primary/90 text-primary-foreground p-3 space-y-2 shadow-md">
           <textarea
             className="w-full bg-transparent text-sm resize-none outline-none border-b border-primary-foreground/20 pb-1 placeholder:text-primary-foreground/40"
             rows={3}
@@ -96,13 +96,13 @@ export function MessageBubble({ message, chunks, isStreaming, isLastUser, onEdit
   return (
     <>
     <div
-      className={cn('flex', isUser ? 'justify-end' : 'justify-start')}
+      className={cn('flex flex-col', isUser ? 'items-end' : 'items-start')}
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}
     >
       <div
         className={cn(
-          'max-w-[60%] rounded-2xl px-4 py-3 relative break-words',
+          'w-fit max-w-full max-w-[60%] max-md:max-w-[75%] rounded-2xl px-4 py-3 relative break-words',
           isUser
             ? 'bg-primary/20 text-foreground rounded-br-sm'
             : 'bg-muted/70 text-foreground rounded-bl-sm',
@@ -110,17 +110,7 @@ export function MessageBubble({ message, chunks, isStreaming, isLastUser, onEdit
       >
         {isUser ? (
           <>
-            <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
-            {message.created_at && (
-              <div className="flex items-center justify-end gap-2 mt-1">
-                <p className="text-[10px] text-foreground/40">{new Date(message.created_at).toLocaleString("zh-CN", { hour12: false })}</p>
-                <button onClick={() => { navigator.clipboard.writeText(message.content); toast.success('已复制') }}
-                  className="text-[10px] text-foreground/30 hover:text-foreground/60 transition-colors cursor-pointer"
-                  title="复制内容" aria-label="复制内容">
-                  <Copy className="h-3 w-3" />
-                </button>
-              </div>
-            )}
+            <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
             {isLastUser && showActions && onEdit && (
               <button
                 onClick={() => onEdit(message.id, message.content)}
@@ -136,7 +126,7 @@ export function MessageBubble({ message, chunks, isStreaming, isLastUser, onEdit
             {message.reasoning_content && (
               <ReasoningBlock content={message.reasoning_content} initiallyExpanded={!!isStreaming} />
             )}
-            <div className="prose prose-sm dark:prose-invert max-w-none text-sm break-words prose-headings:font-bold prose-h3:text-base prose-h4:text-sm prose-strong:text-foreground prose-strong:font-semibold">
+            <div className="prose prose-sm dark:prose-invert max-w-none break-words w-full prose-headings:font-bold prose-h3:text-base prose-h4:text-sm prose-strong:text-foreground prose-strong:font-semibold">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
@@ -148,22 +138,22 @@ export function MessageBubble({ message, chunks, isStreaming, isLastUser, onEdit
               </ReactMarkdown>
             </div>
             {chunks && chunks.length > 0 && <SourceInfo chunks={chunks} />}
-            {message.created_at && !isStreaming && (
-              <div className="flex items-center gap-2 mt-1">
-                <p className="text-[10px] text-foreground/40">{new Date(message.created_at).toLocaleString("zh-CN", { hour12: false })}</p>
-                <button onClick={() => { navigator.clipboard.writeText(message.content); toast.success('已复制') }}
-                  className="text-[10px] text-foreground/30 hover:text-foreground/60 transition-colors cursor-pointer"
-                  title="复制内容" aria-label="复制内容">
-                  <Copy className="h-3 w-3" />
-                </button>
-              </div>
-            )}
           </>
         )}
         {isStreaming && (
           <span className="inline-block w-2 h-4 bg-current animate-pulse ml-0.5" />
         )}
       </div>
+      {message.created_at && !isStreaming && (
+        <div className={cn('flex items-center gap-2 mt-1', isUser ? 'justify-end' : 'justify-start')}>
+          <p className="text-[10px] text-foreground/40">{new Date(message.created_at).toLocaleString("zh-CN", { hour12: false })}</p>
+          <button onClick={() => { navigator.clipboard.writeText(message.content); toast.success('已复制') }}
+            className="text-[10px] text-foreground/30 hover:text-foreground/60 transition-colors cursor-pointer"
+            title="复制内容" aria-label="复制内容">
+            <Copy className="h-3 w-3" />
+          </button>
+        </div>
+      )}
     </div>
     </>
   )
