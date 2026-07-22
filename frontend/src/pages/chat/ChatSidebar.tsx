@@ -98,7 +98,7 @@ export function ChatSidebar({ sessions, currentSessionId, onSelect, onCreate, on
           <div
             key={s.id}
             className={`group flex items-center gap-2.5 rounded-lg px-3 py-2.5 cursor-pointer text-sm transition-all duration-150
-              ${selectMode ? 'hover:bg-muted/40' : s.id === currentSessionId ? 'bg-primary/9 text-foreground font-medium' : 'text-muted-foreground hover:bg-muted/30 hover:text-foreground'}`}
+              ${deleteTarget === s.id ? 'bg-destructive/10 ring-1 ring-destructive/30 text-foreground font-medium' : selectMode ? 'hover:bg-muted/40' : s.id === currentSessionId ? 'bg-primary/9 text-foreground font-medium' : 'text-muted-foreground hover:bg-muted/30 hover:text-foreground'}`}
             onClick={() => selectMode ? toggleSelect(s.id) : onSelect(s.id)}
           >
             {selectMode && (
@@ -112,7 +112,7 @@ export function ChatSidebar({ sessions, currentSessionId, onSelect, onCreate, on
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 opacity-0 group-hover:opacity-100 shrink-0 text-destructive/60 hover:text-destructive"
+                className={`h-6 w-6 shrink-0 text-destructive/60 hover:text-destructive ${deleteTarget === s.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
                 onClick={e => { e.stopPropagation(); setDeleteTarget(s.id) }}
                 aria-label="删除会话"
               >
@@ -128,7 +128,9 @@ export function ChatSidebar({ sessions, currentSessionId, onSelect, onCreate, on
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>确认删除</DialogTitle>
-            <DialogDescription>删除后无法恢复，确定要删除此对话吗？</DialogDescription>
+            <DialogDescription>
+              删除后无法恢复，确定要删除「{sessions.find(s => s.id === deleteTarget)?.title === 'New conversation' ? '新对话' : sessions.find(s => s.id === deleteTarget)?.title || '此对话'}」吗？
+            </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setDeleteTarget(null)}>取消</Button>
