@@ -6,6 +6,7 @@ import { ChatInput } from '@/pages/chat/ChatInput'
 import { Button } from '@/components/ui/button'
 import { PanelLeftOpen, PanelLeftClose } from 'lucide-react'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { useTheme } from '@/hooks/useTheme'
 
 export function ChatPage() {
   const {
@@ -17,6 +18,7 @@ export function ChatPage() {
     sendMessage, abortStream,
   } = useChat()
   const isMobile = useIsMobile()
+  const { glass } = useTheme()
   const [showSessions, setShowSessions] = useState(false)
   const hasAttemptedCreate = useRef(false)
 
@@ -47,7 +49,7 @@ export function ChatPage() {
   }
 
   return (
-    <div className="flex h-full min-h-0 chat-page">
+    <div className={`flex h-full min-h-0 chat-page ${glass ? 'bg-gradient-to-br from-primary/[0.06] via-background to-primary/[0.03]' : ''}`}>
       {/* Mobile overlay */}
       {isMobile && showSessions && (
         <div className="fixed inset-0 z-10 bg-black/20" onClick={() => setShowSessions(false)} />
@@ -62,7 +64,7 @@ export function ChatPage() {
           onBatchDelete={batchDeleteSessions}
         />
       </div>
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className={`flex-1 flex flex-col min-w-0 ${glass ? 'glass-panel glass-edge-light' : 'bg-card'} rounded-xl shadow-sm m-2 ml-0 overflow-hidden`}>
         {/* Mobile header with session toggle */}
         {isMobile && (
           <div className="flex items-center gap-2 px-3 py-2 border-b shrink-0">

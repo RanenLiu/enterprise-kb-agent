@@ -52,7 +52,7 @@ export function ChatSidebar({ sessions, currentSessionId, onSelect, onCreate, on
   }
 
   return (
-    <div className={`w-64 flex flex-col h-full ${glass ? 'glass-panel glass-edge-light rounded-xl shadow-sm' : 'bg-card rounded-xl shadow-sm'} m-2 mr-0 overflow-hidden`}>
+    <div className={`w-64 flex flex-col h-[calc(100%-1rem)] ${glass ? 'glass-panel glass-edge-light rounded-xl shadow-sm' : 'bg-card rounded-xl shadow-sm'} m-2 mr-2 overflow-hidden`}>
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 shrink-0 min-h-[49px] border-b border-border/20">
         {selectMode ? (
@@ -112,7 +112,7 @@ export function ChatSidebar({ sessions, currentSessionId, onSelect, onCreate, on
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 opacity-0 group-hover:opacity-100 shrink-0"
+                className="h-6 w-6 opacity-0 group-hover:opacity-100 shrink-0 text-destructive/60 hover:text-destructive"
                 onClick={e => { e.stopPropagation(); setDeleteTarget(s.id) }}
                 aria-label="删除会话"
               >

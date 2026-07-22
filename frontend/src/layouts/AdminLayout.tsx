@@ -10,12 +10,12 @@ import { ProfileDialog } from '@/components/ProfileDialog'
 import { LogOut, Sun, Moon, Palette, ChevronRight, PaintBucket } from 'lucide-react'
 import { api } from '@/api/client'
 
-const ACCENTS: { key: Accent; color: string }[] = [
-  { key: 'blue', color: 'bg-blue-500' },
-  { key: 'violet', color: 'bg-violet-500' },
-  { key: 'emerald', color: 'bg-emerald-500' },
-  { key: 'amber', color: 'bg-amber-500' },
-  { key: 'rose', color: 'bg-rose-500' },
+const ACCENTS: { key: Accent; className: string }[] = [
+  { key: 'blue', className: 'bg-blue-500' },
+  { key: 'violet', className: 'bg-violet-500' },
+  { key: 'emerald', className: 'bg-emerald-500' },
+  { key: 'amber', className: 'bg-amber-600' },
+  { key: 'rose', className: 'bg-rose-600' },
 ]
 
 const ROUTE_LABELS: Record<string, string> = {
@@ -126,7 +126,7 @@ export function AdminLayout() {
       <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:z-50 focus:top-4 focus:left-4 focus:px-4 focus:py-2 focus:rounded-lg focus:bg-background focus:text-foreground focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-ring">
           跳转到主内容
         </a>
-        <header className={`flex h-14 shrink-0 items-center gap-2 px-4 sticky top-0 z-10 bg-background/80 backdrop-blur-xl border-b border-border/40 ${glass ? 'glass-header glass-edge-light' : ''}`}>
+        <header className={`flex h-14 shrink-0 items-center gap-2 px-4 sticky top-0 z-10 bg-background backdrop-blur-xl ${glass ? 'glass-header glass-edge-light' : ''}`}>
           <SidebarTrigger className="-ml-1.5 text-muted-foreground hover:text-foreground transition-colors" />
           <nav className="flex items-center gap-1.5 text-sm text-muted-foreground">
             {breadcrumbs.map((crumb, i) => (
@@ -150,7 +150,7 @@ export function AdminLayout() {
                   {ACCENTS.map((a) => (
                     <button
                       key={a.key}
-                      className={`h-7 w-7 rounded-full ${a.color} ${accent === a.key ? 'ring-2 ring-offset-2 ring-offset-popover ring-primary' : 'opacity-60 hover:opacity-100'} transition-all`}
+                      className={`h-7 w-7 rounded-full ${a.className} ${accent === a.key ? 'ring-2 ring-offset-2 ring-offset-popover ring-primary' : 'opacity-60 hover:opacity-100'} transition-all`}
                       onClick={() => { setAccent(a.key); setShowAccents(false) }}
                     />
                   ))}
@@ -198,10 +198,10 @@ export function AdminLayout() {
         </header>
 
         <ProfileDialog open={showProfile} onOpenChange={setShowProfile} />
-        <main id="main-content" className={`flex-1 flex flex-col ${isChatPage ? 'overflow-hidden p-0' : 'p-6'} ${narrow ? 'is-narrow' : ''}`} style={{ overflow: 'hidden auto', maxWidth: '100%' }}>
+        <main id="main-content" className={`flex-1 flex flex-col bg-muted/60 ${isChatPage ? 'overflow-hidden p-0' : 'p-6'} ${narrow ? 'is-narrow' : ''}`} style={{ overflow: 'hidden auto', maxWidth: '100%' }}>
           <Outlet />
         </main>
-        <footer className="h-7 shrink-0 flex items-center justify-center border-t text-[10px] text-muted-foreground/40 select-none">
+        <footer className="h-7 shrink-0 flex items-center justify-center bg-background text-[10px] text-muted-foreground/40 select-none">
           &copy; {new Date().getFullYear()} Enterprise Knowledge Base
         </footer>
       </SidebarInset>

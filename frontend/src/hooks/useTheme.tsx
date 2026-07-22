@@ -25,8 +25,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
     return (localStorage.getItem('theme') as Theme) || 'light'
   })
+  const VALID_ACCENTS: Accent[] = ['blue', 'violet', 'emerald', 'amber', 'rose']
   const [accent, setAccentState] = useState<Accent>(() => {
-    return (localStorage.getItem('accent') as Accent) || 'blue'
+    const saved = localStorage.getItem('accent') as Accent
+    return VALID_ACCENTS.includes(saved) ? saved : 'blue'
   })
   const [glass, setGlass] = useState(() => localStorage.getItem('glass') === 'true')
   const [filledIcons, setFilledIcons] = useState(() => localStorage.getItem('filledIcons') === 'true')
@@ -120,11 +122,15 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     root.classList.toggle('dark', theme === 'dark')
     root.classList.toggle('glass-mode', glass)
     root.classList.toggle('filled-icons', filledIcons)
-    const ACCENT_COLORS: Record<Accent, { hue: string }> = {
-      blue: { hue: '222' }, violet: { hue: '270' }, emerald: { hue: '158' },
-      amber: { hue: '40' }, rose: { hue: '348' },
+    const ACCENT_COLORS: Record<Accent, { hue: string; primary: string }> = {
+      blue: { hue: '240', primary: 'oklch(62.3% .214 259.815)' },
+      violet: { hue: '270', primary: 'oklch(60.6% .25 292.717)' },
+      emerald: { hue: '175', primary: 'oklch(59.6% .145 163.225)' },
+      amber: { hue: '50', primary: 'oklch(55.5% .163 48.998)' },
+      rose: { hue: '348', primary: 'oklch(52% .23 16)' },
     }
     root.style.setProperty('--accent-hue', ACCENT_COLORS[accent].hue)
+    root.style.setProperty('--primary', ACCENT_COLORS[accent].primary)
   }, [theme, accent, glass, filledIcons])
 
   return (

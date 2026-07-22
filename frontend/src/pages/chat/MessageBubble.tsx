@@ -75,7 +75,7 @@ export function MessageBubble({ message, chunks, isStreaming, isLastUser, onEdit
     // 编辑模式
     return (
       <div className="flex justify-end">
-        <div className="max-w-[75%] max-md:max-w-[90%] rounded-2xl rounded-br-sm bg-gradient-to-br from-primary to-primary/90 text-primary-foreground p-3 space-y-2 shadow-md">
+        <div className="w-full max-w-lg rounded-2xl rounded-br-sm bg-gradient-to-br from-primary to-primary/90 text-primary-foreground p-3 space-y-2 shadow-md">
           <textarea
             className="w-full bg-transparent text-sm resize-none outline-none border-b border-primary-foreground/20 pb-1 placeholder:text-primary-foreground/40"
             rows={3}
@@ -104,8 +104,8 @@ export function MessageBubble({ message, chunks, isStreaming, isLastUser, onEdit
         className={cn(
           'w-fit max-w-full max-w-[60%] max-md:max-w-[75%] rounded-2xl px-4 py-3 relative break-words',
           isUser
-            ? 'bg-primary/20 text-foreground rounded-br-sm'
-            : 'bg-muted/70 text-foreground rounded-bl-sm',
+            ? 'bg-gradient-to-br from-primary to-primary/85 text-primary-foreground rounded-br-sm'
+            : 'bg-card border border-border/40 text-foreground rounded-bl-sm',
         )}
       >
         {isUser ? (
